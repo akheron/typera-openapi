@@ -40,4 +40,4 @@ export default router(
   requestBody,
   interfaceResponse,
   noExplicitRouteType
-).handler()
+)

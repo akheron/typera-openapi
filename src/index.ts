@@ -24,9 +24,22 @@ function isObjectType(type: ts.Type): type is ts.ObjectType {
 
 const isDefined = <T>(value: T | undefined): value is T => value !== undefined
 
+const isPackageSymbol = (
+  symbol: ts.Symbol,
+  packageName: string,
+  symbolName: string
+): boolean => {
+  const parent = (symbol.valueDeclaration ?? symbol.declarations[0]).parent
+  return (
+    symbol.name === symbolName &&
+    ts.isSourceFile(parent) &&
+    parent.fileName.includes(`/${packageName}/`)
+  )
+}
+
 const generate = (fileNames: string[], options: ts.CompilerOptions): void => {
-  let program = ts.createProgram(fileNames, options)
-  let checker = program.getTypeChecker()
+  const program = ts.createProgram(fileNames, options)
+  const checker = program.getTypeChecker()
 
   for (const sourceFile of program.getSourceFiles()) {
     if (!sourceFile.isDeclarationFile) {
@@ -49,21 +62,42 @@ interface Response {
 const visit = (sourceFile: ts.SourceFile, checker: ts.TypeChecker) => (
   node: ts.Node
 ) => {
-  if (!ts.isVariableStatement(node)) return
-  const routeDeclaration = getRouteDeclaration(
-    checker,
-    node.declarationList.declarations[0]
-  )
-  if (routeDeclaration) console.log(routeDeclaration)
+  if (ts.isExportAssignment(node) && !node.isExportEquals) {
+    // export default
+    const argSymbols = getRouterCallArgSymbols(checker, node.expression)
+    if (!argSymbols) return
+
+    argSymbols.forEach(symbol => {
+      const routeDeclaration = getRouteDeclaration(checker, symbol)
+      if (routeDeclaration) console.log(routeDeclaration)
+    })
+  }
+}
+
+const getRouterCallArgSymbols = (
+  checker: ts.TypeChecker,
+  expression: ts.Expression
+): ts.Symbol[] | undefined => {
+  if (!ts.isCallExpression(expression)) return
+
+  const fn = expression.expression
+  const args = expression.arguments
+
+  // TODO: Check for router calls better than just checking the name
+  if (!ts.isIdentifier(fn) || fn.escapedText !== 'router') return
+
+  const argSymbols = args
+    .filter(ts.isIdentifier)
+    .map(arg => checker.getSymbolAtLocation(arg))
+    .filter(isDefined)
+
+  if (argSymbols.length === args.length) return argSymbols
 }
 
 const getRouteDeclaration = (
   checker: ts.TypeChecker,
-  declaration: ts.VariableDeclaration
+  symbol: ts.Symbol
 ): Route | undefined => {
-  const symbol = checker.getSymbolAtLocation(declaration.name)
-  if (!symbol) return
-
   const responses = getResponseTypes(checker, symbol)
   if (!responses) return
 
@@ -74,16 +108,19 @@ const getResponseTypes = (
   checker: ts.TypeChecker,
   symbol: ts.Symbol
 ): Response[] | undefined => {
-  const type = checker.getTypeOfSymbolAtLocation(
+  const routeType = checker.getTypeOfSymbolAtLocation(
     symbol,
     symbol.valueDeclaration
   )
 
-  // TODO: Check that it's the Route interface from typera, not just something
-  // with the correct name
-  if (!type.aliasSymbol || type.aliasSymbol.name !== 'Route') return
+  if (
+    !routeType.aliasSymbol ||
+    !isPackageSymbol(routeType.aliasSymbol, 'typera-common', 'Route')
+  ) {
+    return
+  }
 
-  const args = type.aliasTypeArguments
+  const args = routeType.aliasTypeArguments
   if (!args || args.length !== 1) {
     throw new Error('expected 1 type argument for Route')
   }
