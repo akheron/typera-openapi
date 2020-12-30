@@ -50,6 +50,8 @@ const generate = (fileNames: string[], options: ts.CompilerOptions): void => {
 
 interface Route {
   variableName: string
+  method: string
+  path: string
   responses: Response[]
 }
 
@@ -83,7 +85,7 @@ const getRouterCallArgSymbols = (
   const fn = expression.expression
   const args = expression.arguments
 
-  // TODO: Check for router calls better than just checking the name
+  // TODO: Check for router calls better than just checking the symbol name
   if (!ts.isIdentifier(fn) || fn.escapedText !== 'router') return
 
   const argSymbols = args
@@ -98,10 +100,107 @@ const getRouteDeclaration = (
   checker: ts.TypeChecker,
   symbol: ts.Symbol
 ): Route | undefined => {
+  const inputTypes = getInputTypes(checker, symbol)
+  if (!inputTypes) return
+  const { method, path, body, query, params } = inputTypes
+
   const responses = getResponseTypes(checker, symbol)
   if (!responses) return
 
-  return { variableName: symbol.getName(), responses }
+  return { variableName: symbol.getName(), method, path, responses }
+}
+
+const methodNames = [
+  'get',
+  'post',
+  'put',
+  'delete',
+  'head',
+  'options',
+  'patch',
+  'all',
+]
+
+interface InputTypes {
+  method: string
+  path: string
+  // TODO
+  body: ts.Symbol | null
+  query: ts.Symbol | null
+  params: ts.Symbol | null
+}
+
+const getInputTypes = (
+  checker: ts.TypeChecker,
+  symbol: ts.Symbol
+): InputTypes | undefined => {
+  const declaration = symbol.valueDeclaration
+  if (!ts.isVariableDeclaration(declaration)) return
+
+  let expr = declaration.initializer
+  if (!expr) return
+
+  let method: string | null = null,
+    path: string | null = null,
+    body: ts.Symbol | null = null,
+    query: ts.Symbol | null = null,
+    params: ts.Symbol | null = null
+
+  while (ts.isCallExpression(expr)) {
+    const lhs: ts.LeftHandSideExpression = expr.expression
+    // const args = expr.arguments
+    if (!ts.isPropertyAccessExpression(lhs)) {
+      console.warn('TODO: direct route call')
+      return
+    } else {
+      if (!ts.isIdentifier(lhs.name)) return
+      const fnName = lhs.name.escapedText.toString()
+      if (methodNames.includes(fnName)) {
+        method = fnName
+        const pathArg = expr.arguments[0]
+        if (!pathArg) {
+          console.warn(`No argument for method ${fnName}`)
+          return
+        }
+        if (!ts.isStringLiteral(pathArg)) {
+          console.warn(`Method ${fnName} argument is not a string literal`)
+          return
+        }
+        path = pathArg.text
+      } else if (fnName === 'handler') {
+        const handlerFn = expr.arguments[0]
+        if (
+          !handlerFn ||
+          (!ts.isArrowFunction(handlerFn) &&
+            !ts.isFunctionExpression(handlerFn))
+        ) {
+          console.warn('Handler is not a function')
+          return
+        }
+        const req = handlerFn.parameters[0]
+        if (req) {
+          const type = checker.getTypeAtLocation(req)
+          body = type.getProperty('body') ?? null
+          query = type.getProperty('query') ?? null
+          params = type.getProperty('params') ?? null
+        }
+      }
+      expr = lhs.expression
+    }
+  }
+  if (!method) {
+    console.warn('Could not determine route method')
+    return
+  }
+  if (!path) {
+    console.warn('Could not determine route path')
+    return
+  }
+  if (method === 'all') {
+    console.warn("The 'all' method is not supported, skipping route")
+    return
+  }
+  return { method, path, body, query, params }
 }
 
 const getResponseTypes = (
