@@ -26,7 +26,7 @@ interface Route {
   path: string
   parameters: OpenAPIV3.ParameterObject[] | undefined
   requestBody: OpenAPIV3.SchemaObject | undefined
-  responses: Response[]
+  responses: OpenAPIV3.ResponsesObject
 }
 
 interface Response {
@@ -44,7 +44,7 @@ const visit = (sourceFile: ts.SourceFile, checker: ts.TypeChecker) => (
     if (!argSymbols) return
 
     argSymbols.forEach(symbol => {
-      const routeDeclaration = getRouteDeclaration(checker, symbol)
+      const routeDeclaration = getRouteDeclaration(checker, node, symbol)
       if (routeDeclaration) {
         console.log(JSON.stringify(routeDeclaration, null, 2))
       }
@@ -74,13 +74,14 @@ const getRouterCallArgSymbols = (
 
 const getRouteDeclaration = (
   checker: ts.TypeChecker,
+  location: ts.Node,
   symbol: ts.Symbol
 ): Route | undefined => {
   const routeInput = getRouteInput(checker, symbol)
   if (!routeInput) return
   const { method, path, requestNode, body, query, routeParams } = routeInput
 
-  const responses = getResponseTypes(checker, symbol)
+  const responses = getResponseTypes(checker, location, symbol)
   if (!responses) return
 
   const requestBody =
@@ -198,8 +199,9 @@ const getRouteInput = (
 
 const getResponseTypes = (
   checker: ts.TypeChecker,
+  location: ts.Node,
   symbol: ts.Symbol
-): Response[] | undefined => {
+): OpenAPIV3.ResponsesObject | undefined => {
   const routeType = checker.getTypeOfSymbolAtLocation(
     symbol,
     symbol.valueDeclaration
@@ -218,23 +220,30 @@ const getResponseTypes = (
   }
   const responseType = args[0]
 
+  const result: OpenAPIV3.ResponsesObject = {}
   if (isObjectType(responseType)) {
-    const response = getResponseDefinition(checker, responseType)
-    if (response) return [response]
+    const responseDef = getResponseDefinition(checker, location, responseType)
+    if (responseDef) result[responseDef.status] = responseDef.response
   } else if (responseType.isUnion()) {
-    const responses = responseType.types
-      .map(type => getResponseDefinition(checker, type))
-      .filter(isDefined)
-    if (responses.length) return responses
+    responseType.types.forEach(type => {
+      const responseDef = getResponseDefinition(checker, location, type)
+      if (responseDef) result[responseDef.status] = responseDef.response
+    })
   }
 
-  // If we ended down here, the response types could not be determined so this is not a valid route after all
+  if (Object.keys(result).length === 0) {
+    // Any response types could not be determined so this is not a valid route after all
+    return
+  }
+
+  return result
 }
 
 const getResponseDefinition = (
   checker: ts.TypeChecker,
+  location: ts.Node,
   responseType: ts.Type
-): Response | undefined => {
+): { status: string; response: OpenAPIV3.ResponseObject } | undefined => {
   const statusSymbol = responseType.getProperty('status')
   const bodySymbol = responseType.getProperty('body')
   const headersSymbol = responseType.getProperty('headers')
@@ -258,10 +267,38 @@ const getResponseDefinition = (
     return
   }
 
+  const status = checker.typeToString(statusType)
+
+  // TODO: If bodyType is an interface (or type alias?), generate a schema
+  // component object and a reference to it?
+  let bodySchema: OpenAPIV3.SchemaObject | undefined
+  if (!isUndefinedType(bodyType)) {
+    bodySchema = typeToSchema(checker, location, bodyType)
+    if (!bodySchema) return
+  }
+
+  const headers = !isUndefinedType(headersType)
+    ? typeToHeaders(checker, headersType)
+    : undefined
+
   return {
-    status: checker.typeToString(statusType),
-    bodyType: checker.typeToString(bodyType),
-    headersType: checker.typeToString(headersType),
+    status,
+    response: {
+      description: status, // TODO: What should the response description be?
+      ...(bodySchema
+        ? {
+            content: {
+              // TODO: application/json should probably not be hard-coded
+              'application/json': bodySchema,
+            },
+          }
+        : undefined),
+      ...(headers
+        ? {
+            headers,
+          }
+        : undefined),
+    },
   }
 }
 
@@ -278,6 +315,20 @@ const typeToParameters = (
     in: in_,
     required: in_ === 'path' ? true : !isOptional(prop),
   }))
+}
+
+const typeToHeaders = (
+  checker: ts.TypeChecker,
+  type: ts.Type
+): { [header: string]: OpenAPIV3.HeaderObject } => {
+  const result: { [header: string]: OpenAPIV3.HeaderObject } = {}
+  const props = checker.getPropertiesOfType(type)
+  props.forEach(prop => {
+    result[prop.name] = {
+      required: !isOptional(prop),
+    }
+  })
+  return result
 }
 
 const typeToSchema = (

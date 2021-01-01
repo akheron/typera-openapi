@@ -16,7 +16,7 @@ const codec = t.intersection([
 ])
 
 const requestBody: Route<
-  Response.Ok<string> | Response.Created<number> | Response.BadRequest<string>
+  Response.Ok<string> | Response.Created | Response.BadRequest<string>
 > = route
   .post('/request-body')
   .use(Parser.body(codec))
@@ -24,7 +24,7 @@ const requestBody: Route<
     if (request.body.optionalBool) {
       return Response.ok(request.body.str)
     } else {
-      return Response.created(42)
+      return Response.created()
     }
   })
 
@@ -86,6 +86,13 @@ const brandedRequestBody: Route<
     return Response.ok(request.body.param)
   })
 
+// Response headers
+const responseHeaders: Route<
+  Response.Ok<string, { 'X-Foo': string; 'X-Bar'?: string }>
+> = route.get('/response-headers').handler(async () => {
+  return Response.ok('yep', { 'X-Foo': 'foo', 'X-Bar': 'bar' })
+})
+
 export default router(
   constant,
   requestBody,
@@ -94,5 +101,6 @@ export default router(
   unusedRequest,
   query,
   routeParams,
-  brandedRequestBody
+  brandedRequestBody,
+  responseHeaders
 )
