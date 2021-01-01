@@ -1,4 +1,5 @@
 import * as ts from 'typescript'
+import { OpenAPIV3 } from 'openapi-types'
 
 const MAX_FLAG_COUNT = 28
 
@@ -18,11 +19,25 @@ function extractFlags(input: number): number[] {
   return flags
 }
 
-function isObjectType(type: ts.Type): type is ts.ObjectType {
-  return extractFlags(type.flags).includes(ts.TypeFlags.Object)
-}
-
 const isDefined = <T>(value: T | undefined): value is T => value !== undefined
+
+const isOptional = (symbol: ts.Symbol): boolean =>
+  !!(symbol.flags & ts.SymbolFlags.Optional)
+const isObjectType = (type: ts.Type): boolean =>
+  !!(type.flags & ts.TypeFlags.Object)
+const isUndefinedType = (type: ts.Type): boolean =>
+  !!(type.flags & ts.TypeFlags.Undefined)
+
+const getPropertyType = (
+  checker: ts.TypeChecker,
+  location: ts.Node,
+  type: ts.Type,
+  propertyName: string
+): ts.Type | null => {
+  const prop = type.getProperty(propertyName)
+  if (!prop) return null
+  return checker.getTypeOfSymbolAtLocation(prop, location)
+}
 
 const isPackageSymbol = (
   symbol: ts.Symbol,
@@ -52,6 +67,7 @@ interface Route {
   variableName: string
   method: string
   path: string
+  requestBody: OpenAPIV3.SchemaObject | undefined
   responses: Response[]
 }
 
@@ -71,7 +87,9 @@ const visit = (sourceFile: ts.SourceFile, checker: ts.TypeChecker) => (
 
     argSymbols.forEach(symbol => {
       const routeDeclaration = getRouteDeclaration(checker, symbol)
-      if (routeDeclaration) console.log(routeDeclaration)
+      if (routeDeclaration) {
+        console.log(JSON.stringify(routeDeclaration, null, 2))
+      }
     })
   }
 }
@@ -100,14 +118,23 @@ const getRouteDeclaration = (
   checker: ts.TypeChecker,
   symbol: ts.Symbol
 ): Route | undefined => {
-  const inputTypes = getInputTypes(checker, symbol)
-  if (!inputTypes) return
-  const { method, path, body, query, params } = inputTypes
+  const routeInput = getRouteInput(checker, symbol)
+  if (!routeInput) return
+  const { method, path, requestNode, body, query, routeParams } = routeInput
 
   const responses = getResponseTypes(checker, symbol)
   if (!responses) return
 
-  return { variableName: symbol.getName(), method, path, responses }
+  const requestBody =
+    requestNode && body ? typeToSchema(checker, requestNode, body) : undefined
+
+  return {
+    variableName: symbol.getName(),
+    method,
+    path,
+    requestBody,
+    responses,
+  }
 }
 
 const methodNames = [
@@ -121,19 +148,19 @@ const methodNames = [
   'all',
 ]
 
-interface InputTypes {
+interface RouteInput {
   method: string
   path: string
-  // TODO
-  body: ts.Symbol | null
-  query: ts.Symbol | null
-  params: ts.Symbol | null
+  requestNode: ts.Node | null
+  body: ts.Type | null
+  query: ts.Type | null
+  routeParams: ts.Type | null
 }
 
-const getInputTypes = (
+const getRouteInput = (
   checker: ts.TypeChecker,
   symbol: ts.Symbol
-): InputTypes | undefined => {
+): RouteInput | undefined => {
   const declaration = symbol.valueDeclaration
   if (!ts.isVariableDeclaration(declaration)) return
 
@@ -142,9 +169,10 @@ const getInputTypes = (
 
   let method: string | null = null,
     path: string | null = null,
-    body: ts.Symbol | null = null,
-    query: ts.Symbol | null = null,
-    params: ts.Symbol | null = null
+    requestNode: ts.Node | null = null,
+    body: ts.Type | null = null,
+    query: ts.Type | null = null,
+    routeParams: ts.Type | null = null
 
   while (ts.isCallExpression(expr)) {
     const lhs: ts.LeftHandSideExpression = expr.expression
@@ -180,9 +208,10 @@ const getInputTypes = (
         const req = handlerFn.parameters[0]
         if (req) {
           const type = checker.getTypeAtLocation(req)
-          body = type.getProperty('body') ?? null
-          query = type.getProperty('query') ?? null
-          params = type.getProperty('params') ?? null
+          body = getPropertyType(checker, req, type, 'body')
+          query = getPropertyType(checker, req, type, 'query')
+          routeParams = getPropertyType(checker, req, type, 'routeParams')
+          requestNode = req
         }
       }
       expr = lhs.expression
@@ -200,7 +229,7 @@ const getInputTypes = (
     console.warn("The 'all' method is not supported, skipping route")
     return
   }
-  return { method, path, body, query, params }
+  return { method, path, requestNode, body, query, routeParams }
 }
 
 const getResponseTypes = (
@@ -270,6 +299,81 @@ const getResponseDefinition = (
     bodyType: checker.typeToString(bodyType),
     headersType: checker.typeToString(headersType),
   }
+}
+
+const typeToSchema = (
+  checker: ts.TypeChecker,
+  location: ts.Node,
+  type: ts.Type,
+  optional = false
+): OpenAPIV3.SchemaObject | undefined => {
+  if (type.isUnion()) {
+    const elems = optional
+      ? type.types.filter(elem => !isUndefinedType(elem))
+      : type.types
+
+    if (elems.every(elem => elem.flags & ts.TypeFlags.BooleanLiteral)) {
+      // All elements are boolean literals => boolean
+      return { type: 'boolean' }
+    } else if (elems.length >= 2) {
+      // 2 or more types remain => anyOf
+      return {
+        anyOf: elems
+          .map(elem => typeToSchema(checker, location, elem))
+          .filter(isDefined),
+      }
+    } else {
+      // Only one element left in the union. Fall through and consider it as the
+      // sole type.
+      type = elems[0]
+    }
+  }
+
+  if (
+    isObjectType(type) ||
+    (type.isIntersection() && type.types.every(part => isObjectType(part)))
+  ) {
+    const props = checker.getPropertiesOfType(type)
+    return {
+      type: 'object',
+      required: props.filter(prop => !isOptional(prop)).map(prop => prop.name),
+      properties: Object.fromEntries(
+        props
+          .map(prop => {
+            const propType = checker.getTypeOfSymbolAtLocation(prop, location)
+            if (!propType) {
+              console.warn('Could not get type for property', prop.name)
+              return
+            }
+            const propSchema = typeToSchema(
+              checker,
+              location,
+              propType,
+              isOptional(prop)
+            )
+            if (!propSchema) {
+              console.warn('Could not get schema for property', prop.name)
+              return
+            }
+            return [prop.name, propSchema]
+          })
+          .filter(isDefined)
+      ),
+    }
+  }
+
+  if (type.flags & ts.TypeFlags.String) {
+    return { type: 'string' }
+  }
+  if (type.flags & ts.TypeFlags.Number) {
+    return { type: 'number' }
+  }
+  if (type.flags & ts.TypeFlags.Boolean) {
+    return { type: 'boolean' }
+  }
+
+  console.warn('Unknown type, skipping')
+  return
 }
 
 function main() {

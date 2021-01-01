@@ -8,5 +8,13 @@
   "license": "MIT",
   "scripts": {
     "start:dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "openapi-types": "^7.0.1"
+  },
+  "devDependencies": {
+    "io-ts": "^2.2.13",
+    "io-ts-types": "^0.5.12",
+    "typera-express": "2.0.0-alpha.2"
   }
 }
