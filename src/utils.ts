@@ -15,9 +15,9 @@ export const getPropertyType = (
   location: ts.Node,
   type: ts.Type,
   propertyName: string
-): ts.Type | null => {
+): ts.Type | undefined => {
   const prop = type.getProperty(propertyName)
-  if (!prop) return null
+  if (!prop) return
   return checker.getTypeOfSymbolAtLocation(prop, location)
 }
 

@@ -24,6 +24,7 @@ interface Route {
   variableName: string
   method: string
   path: string
+  parameters: OpenAPIV3.ParameterObject[] | undefined
   requestBody: OpenAPIV3.SchemaObject | undefined
   responses: Response[]
 }
@@ -85,10 +86,16 @@ const getRouteDeclaration = (
   const requestBody =
     requestNode && body ? typeToSchema(checker, requestNode, body) : undefined
 
+  const parameters = [
+    ...typeToParameters(checker, 'path', routeParams),
+    ...typeToParameters(checker, 'query', query),
+  ]
+
   return {
     variableName: symbol.getName(),
     method,
     path,
+    parameters: parameters.length > 0 ? parameters : undefined,
     requestBody,
     responses,
   }
@@ -108,10 +115,10 @@ const methodNames = [
 interface RouteInput {
   method: string
   path: string
-  requestNode: ts.Node | null
-  body: ts.Type | null
-  query: ts.Type | null
-  routeParams: ts.Type | null
+  requestNode: ts.Node | undefined
+  body: ts.Type | undefined
+  query: ts.Type | undefined
+  routeParams: ts.Type | undefined
 }
 
 const getRouteInput = (
@@ -124,12 +131,12 @@ const getRouteInput = (
   let expr = declaration.initializer
   if (!expr) return
 
-  let method: string | null = null,
-    path: string | null = null,
-    requestNode: ts.Node | null = null,
-    body: ts.Type | null = null,
-    query: ts.Type | null = null,
-    routeParams: ts.Type | null = null
+  let method: string | undefined,
+    path: string | undefined,
+    requestNode: ts.Node | undefined,
+    body: ts.Type | undefined,
+    query: ts.Type | undefined,
+    routeParams: ts.Type | undefined
 
   while (ts.isCallExpression(expr)) {
     const lhs: ts.LeftHandSideExpression = expr.expression
@@ -256,6 +263,21 @@ const getResponseDefinition = (
     bodyType: checker.typeToString(bodyType),
     headersType: checker.typeToString(headersType),
   }
+}
+
+const typeToParameters = (
+  checker: ts.TypeChecker,
+  in_: 'path' | 'query' | 'header' | 'cookie',
+  type: ts.Type | undefined
+): OpenAPIV3.ParameterObject[] => {
+  if (!type) return []
+
+  const props = checker.getPropertiesOfType(type)
+  return props.map(prop => ({
+    name: prop.name,
+    in: in_,
+    required: in_ === 'path' ? true : !isOptional(prop),
+  }))
 }
 
 const typeToSchema = (

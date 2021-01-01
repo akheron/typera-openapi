@@ -55,11 +55,16 @@ const unusedRequest: Route<Response.Ok<string>> = route
   })
 
 // Query parser
+const queryCodec = t.intersection([
+  t.type({ str: t.string }),
+  t.partial({ num: NumberFromString }),
+])
+
 const query: Route<Response.Ok<string> | Response.BadRequest<string>> = route
   .get('/query')
-  .use(Parser.query(codec))
+  .use(Parser.query(queryCodec))
   .handler(async request => {
-    return Response.ok(request.query.param)
+    return Response.ok(request.query.str)
   })
 
 // Route params
