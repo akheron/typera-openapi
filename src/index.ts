@@ -1,56 +1,13 @@
 import * as ts from 'typescript'
 import { OpenAPIV3 } from 'openapi-types'
-
-const MAX_FLAG_COUNT = 28
-
-const values = new Array(MAX_FLAG_COUNT)
-  .fill(undefined)
-  .map((_, i) => Math.max(1, 2 << (i - 1)))
-
-function extractFlags(input: number): number[] {
-  const flags = []
-  for (let i = MAX_FLAG_COUNT; i >= 0; i--) {
-    if (input >= values[i]) {
-      input -= values[i]
-      flags.push(values[i])
-    }
-    if (input === 0) return flags
-  }
-  return flags
-}
-
-const isDefined = <T>(value: T | undefined): value is T => value !== undefined
-
-const isOptional = (symbol: ts.Symbol): boolean =>
-  !!(symbol.flags & ts.SymbolFlags.Optional)
-const isObjectType = (type: ts.Type): boolean =>
-  !!(type.flags & ts.TypeFlags.Object)
-const isUndefinedType = (type: ts.Type): boolean =>
-  !!(type.flags & ts.TypeFlags.Undefined)
-
-const getPropertyType = (
-  checker: ts.TypeChecker,
-  location: ts.Node,
-  type: ts.Type,
-  propertyName: string
-): ts.Type | null => {
-  const prop = type.getProperty(propertyName)
-  if (!prop) return null
-  return checker.getTypeOfSymbolAtLocation(prop, location)
-}
-
-const isPackageSymbol = (
-  symbol: ts.Symbol,
-  packageName: string,
-  symbolName: string
-): boolean => {
-  const parent = (symbol.valueDeclaration ?? symbol.declarations[0]).parent
-  return (
-    symbol.name === symbolName &&
-    ts.isSourceFile(parent) &&
-    parent.fileName.includes(`/${packageName}/`)
-  )
-}
+import {
+  isDefined,
+  isOptional,
+  isObjectType,
+  isUndefinedType,
+  isPackageSymbol,
+  getPropertyType,
+} from './utils'
 
 const generate = (fileNames: string[], options: ts.CompilerOptions): void => {
   const program = ts.createProgram(fileNames, options)
@@ -290,7 +247,7 @@ const getResponseDefinition = (
   )
   if (!statusType || !bodyType || !headersType) return
 
-  if (!extractFlags(statusType.flags).includes(ts.TypeFlags.NumberLiteral)) {
+  if (!(statusType.flags & ts.TypeFlags.NumberLiteral)) {
     return
   }
 
