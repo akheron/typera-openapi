@@ -22,11 +22,8 @@ const generate = (fileNames: string[], options: ts.CompilerOptions): void => {
 
 interface Route {
   variableName: string
-  method: string
   path: string
-  parameters: OpenAPIV3.ParameterObject[] | undefined
-  requestBody: OpenAPIV3.SchemaObject | undefined
-  responses: OpenAPIV3.ResponsesObject
+  pathItem: OpenAPIV3.PathItemObject
 }
 
 interface Response {
@@ -43,12 +40,16 @@ const visit = (sourceFile: ts.SourceFile, checker: ts.TypeChecker) => (
     const argSymbols = getRouterCallArgSymbols(checker, node.expression)
     if (!argSymbols) return
 
+    const paths: OpenAPIV3.PathsObject = {}
+
     argSymbols.forEach(symbol => {
       const routeDeclaration = getRouteDeclaration(checker, node, symbol)
       if (routeDeclaration) {
-        console.log(JSON.stringify(routeDeclaration, null, 2))
+        paths[routeDeclaration.path] = routeDeclaration.pathItem
       }
     })
+
+    console.log(JSON.stringify(paths, null, 2))
   }
 }
 
@@ -94,11 +95,23 @@ const getRouteDeclaration = (
 
   return {
     variableName: symbol.getName(),
-    method,
     path,
-    parameters: parameters.length > 0 ? parameters : undefined,
-    requestBody,
-    responses,
+    pathItem: {
+      [method]: {
+        parameters: parameters.length > 0 ? parameters : undefined,
+        ...operationRequestBody(requestBody),
+        responses,
+      },
+    },
+  }
+}
+
+const operationRequestBody = (
+  contentSchema: OpenAPIV3.SchemaObject | undefined
+): { requestBody: OpenAPIV3.RequestBodyObject } | undefined => {
+  if (!contentSchema) return
+  return {
+    requestBody: { content: { 'application/json': { schema: contentSchema } } },
   }
 }
 
@@ -289,7 +302,9 @@ const getResponseDefinition = (
         ? {
             content: {
               // TODO: application/json should probably not be hard-coded
-              'application/json': bodySchema,
+              'application/json': {
+                schema: bodySchema,
+              },
             },
           }
         : undefined),
