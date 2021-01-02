@@ -93,9 +93,11 @@ const getRouteDeclaration = (
     ...typeToParameters(checker, 'query', query),
   ]
 
+  const pathTemplate = path.replace(/:([^-.()/]+)\(.*?\)/g, '{$1}')
+
   return {
     variableName: symbol.getName(),
-    path,
+    path: pathTemplate,
     pathItem: {
       [method]: {
         parameters: parameters.length > 0 ? parameters : undefined,
