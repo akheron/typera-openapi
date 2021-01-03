@@ -7,7 +7,7 @@
   "author": "Petri Lehtinen <petri@digip.org>",
   "license": "MIT",
   "scripts": {
-    "start:dev": "ts-node src/index.ts"
+    "start:dev": "ts-node src/cli.ts"
   },
   "dependencies": {
     "openapi-types": "^7.0.1"

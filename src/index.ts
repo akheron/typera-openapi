@@ -9,15 +9,33 @@ import {
   getPropertyType,
 } from './utils'
 
-const generate = (fileNames: string[], options: ts.CompilerOptions): void => {
+interface Result {
+  fileName: string
+  paths: OpenAPIV3.PathsObject
+}
+
+export const generate = (
+  fileNames: string[],
+  options: ts.CompilerOptions
+): Result[] => {
   const program = ts.createProgram(fileNames, options)
   const checker = program.getTypeChecker()
 
+  const result: Result[] = []
+
   for (const sourceFile of program.getSourceFiles()) {
-    if (!sourceFile.isDeclarationFile) {
-      ts.forEachChild(sourceFile, visit(sourceFile, checker))
-    }
+    if (!fileNames.includes(sourceFile.fileName)) continue
+    if (sourceFile.isDeclarationFile) continue
+
+    ts.forEachChild(sourceFile, node => {
+      const paths = visit(sourceFile, checker, node)
+      if (paths) {
+        result.push({ fileName: sourceFile.fileName, paths })
+      }
+    })
   }
+
+  return result
 }
 
 interface Route {
@@ -26,15 +44,11 @@ interface Route {
   pathItem: OpenAPIV3.PathItemObject
 }
 
-interface Response {
-  status: string
-  bodyType: string
-  headersType: string
-}
-
-const visit = (sourceFile: ts.SourceFile, checker: ts.TypeChecker) => (
+const visit = (
+  sourceFile: ts.SourceFile,
+  checker: ts.TypeChecker,
   node: ts.Node
-) => {
+): OpenAPIV3.PathsObject | undefined => {
   if (ts.isExportAssignment(node) && !node.isExportEquals) {
     // export default
     const argSymbols = getRouterCallArgSymbols(checker, node.expression)
@@ -48,8 +62,7 @@ const visit = (sourceFile: ts.SourceFile, checker: ts.TypeChecker) => (
         paths[routeDeclaration.path] = routeDeclaration.pathItem
       }
     })
-
-    console.log(JSON.stringify(paths, null, 2))
+    return paths
   }
 }
 
@@ -423,9 +436,3 @@ const typeToSchema = (
   console.warn(`Unknown type, skipping: ${checker.typeToString(type)}`)
   return
 }
-
-function main() {
-  generate(process.argv.slice(2), { strict: true })
-}
-
-main()
