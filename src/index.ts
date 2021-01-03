@@ -1,5 +1,6 @@
 import * as ts from 'typescript'
 import { OpenAPIV3 } from 'openapi-types'
+import { Context, context, withLocation } from './context'
 import {
   isDefined,
   isOptional,
@@ -16,9 +17,9 @@ interface Result {
 
 export const generate = (
   fileNames: string[],
-  options: ts.CompilerOptions
+  compilerOptions: ts.CompilerOptions
 ): Result[] => {
-  const program = ts.createProgram(fileNames, options)
+  const program = ts.createProgram(fileNames, compilerOptions)
   const checker = program.getTypeChecker()
 
   const result: Result[] = []
@@ -28,7 +29,7 @@ export const generate = (
     if (sourceFile.isDeclarationFile) continue
 
     ts.forEachChild(sourceFile, node => {
-      const paths = visit(sourceFile, checker, node)
+      const paths = visit(context(checker, node), node)
       if (paths) {
         result.push({ fileName: sourceFile.fileName, paths })
       }
@@ -38,28 +39,26 @@ export const generate = (
   return result
 }
 
-interface Route {
-  variableName: string
-  path: string
-  pathItem: OpenAPIV3.PathItemObject
-}
-
 const visit = (
-  sourceFile: ts.SourceFile,
-  checker: ts.TypeChecker,
+  ctx: Context,
   node: ts.Node
 ): OpenAPIV3.PathsObject | undefined => {
   if (ts.isExportAssignment(node) && !node.isExportEquals) {
-    // export default
-    const argSymbols = getRouterCallArgSymbols(checker, node.expression)
+    // 'export default' statement
+    const argSymbols = getRouterCallArgSymbols(ctx, node.expression)
     if (!argSymbols) return
 
     const paths: OpenAPIV3.PathsObject = {}
 
     argSymbols.forEach(symbol => {
-      const routeDeclaration = getRouteDeclaration(checker, node, symbol)
+      const location = symbol.valueDeclaration
+      const routeDeclaration = getRouteDeclaration(
+        withLocation(ctx, location),
+        symbol
+      )
       if (routeDeclaration) {
-        paths[routeDeclaration.path] = routeDeclaration.pathItem
+        const [path, pathItem] = routeDeclaration
+        paths[path] = pathItem
       }
     })
     return paths
@@ -67,7 +66,7 @@ const visit = (
 }
 
 const getRouterCallArgSymbols = (
-  checker: ts.TypeChecker,
+  ctx: Context,
   expression: ts.Expression
 ): ts.Symbol[] | undefined => {
   if (!ts.isCallExpression(expression)) return
@@ -80,45 +79,46 @@ const getRouterCallArgSymbols = (
 
   const argSymbols = args
     .filter(ts.isIdentifier)
-    .map(arg => checker.getSymbolAtLocation(arg))
+    .map(arg => ctx.checker.getSymbolAtLocation(arg))
     .filter(isDefined)
 
-  if (argSymbols.length === args.length) return argSymbols
+  if (argSymbols.length !== args.length) return
+  return argSymbols
 }
 
 const getRouteDeclaration = (
-  checker: ts.TypeChecker,
-  location: ts.Node,
+  ctx: Context,
   symbol: ts.Symbol
-): Route | undefined => {
-  const routeInput = getRouteInput(checker, symbol)
+): [string, OpenAPIV3.PathItemObject] | undefined => {
+  const routeInput = getRouteInput(ctx, symbol)
   if (!routeInput) return
   const { method, path, requestNode, body, query, routeParams } = routeInput
 
-  const responses = getResponseTypes(checker, location, symbol)
+  const responses = getResponseTypes(ctx, symbol)
   if (!responses) return
 
   const requestBody =
-    requestNode && body ? typeToSchema(checker, requestNode, body) : undefined
+    requestNode && body
+      ? typeToSchema(withLocation(ctx, requestNode), body)
+      : undefined
 
   const parameters = [
-    ...typeToParameters(checker, 'path', routeParams),
-    ...typeToParameters(checker, 'query', query),
+    ...typeToParameters(ctx, 'path', routeParams),
+    ...typeToParameters(ctx, 'query', query),
   ]
 
   const pathTemplate = path.replace(/:([^-.()/]+)\(.*?\)/g, '{$1}')
 
-  return {
-    variableName: symbol.getName(),
-    path: pathTemplate,
-    pathItem: {
+  return [
+    pathTemplate,
+    {
       [method]: {
         parameters: parameters.length > 0 ? parameters : undefined,
         ...operationRequestBody(requestBody),
         responses,
       },
     },
-  }
+  ]
 }
 
 const operationRequestBody = (
@@ -151,7 +151,7 @@ interface RouteInput {
 }
 
 const getRouteInput = (
-  checker: ts.TypeChecker,
+  ctx: Context,
   symbol: ts.Symbol
 ): RouteInput | undefined => {
   const declaration = symbol.valueDeclaration
@@ -200,10 +200,10 @@ const getRouteInput = (
         }
         const req = handlerFn.parameters[0]
         if (req) {
-          const type = checker.getTypeAtLocation(req)
-          body = getPropertyType(checker, req, type, 'body')
-          query = getPropertyType(checker, req, type, 'query')
-          routeParams = getPropertyType(checker, req, type, 'routeParams')
+          const type = ctx.checker.getTypeAtLocation(req)
+          body = getPropertyType(ctx.checker, req, type, 'body')
+          query = getPropertyType(ctx.checker, req, type, 'query')
+          routeParams = getPropertyType(ctx.checker, req, type, 'routeParams')
           requestNode = req
         }
       }
@@ -226,11 +226,10 @@ const getRouteInput = (
 }
 
 const getResponseTypes = (
-  checker: ts.TypeChecker,
-  location: ts.Node,
+  ctx: Context,
   symbol: ts.Symbol
 ): OpenAPIV3.ResponsesObject | undefined => {
-  const routeType = checker.getTypeOfSymbolAtLocation(
+  const routeType = ctx.checker.getTypeOfSymbolAtLocation(
     symbol,
     symbol.valueDeclaration
   )
@@ -250,11 +249,11 @@ const getResponseTypes = (
 
   const result: OpenAPIV3.ResponsesObject = {}
   if (isObjectType(responseType)) {
-    const responseDef = getResponseDefinition(checker, location, responseType)
+    const responseDef = getResponseDefinition(ctx, responseType)
     if (responseDef) result[responseDef.status] = responseDef.response
   } else if (responseType.isUnion()) {
     responseType.types.forEach(type => {
-      const responseDef = getResponseDefinition(checker, location, type)
+      const responseDef = getResponseDefinition(ctx, type)
       if (responseDef) result[responseDef.status] = responseDef.response
     })
   }
@@ -268,8 +267,7 @@ const getResponseTypes = (
 }
 
 const getResponseDefinition = (
-  checker: ts.TypeChecker,
-  location: ts.Node,
+  ctx: Context,
   responseType: ts.Type
 ): { status: string; response: OpenAPIV3.ResponseObject } | undefined => {
   const statusSymbol = responseType.getProperty('status')
@@ -277,15 +275,15 @@ const getResponseDefinition = (
   const headersSymbol = responseType.getProperty('headers')
   if (!statusSymbol || !bodySymbol || !headersSymbol) return
 
-  const statusType = checker.getTypeOfSymbolAtLocation(
+  const statusType = ctx.checker.getTypeOfSymbolAtLocation(
     statusSymbol,
     statusSymbol.valueDeclaration
   )
-  const bodyType = checker.getTypeOfSymbolAtLocation(
+  const bodyType = ctx.checker.getTypeOfSymbolAtLocation(
     bodySymbol,
     bodySymbol.valueDeclaration
   )
-  const headersType = checker.getTypeOfSymbolAtLocation(
+  const headersType = ctx.checker.getTypeOfSymbolAtLocation(
     headersSymbol,
     headersSymbol.valueDeclaration
   )
@@ -295,18 +293,18 @@ const getResponseDefinition = (
     return
   }
 
-  const status = checker.typeToString(statusType)
+  const status = ctx.checker.typeToString(statusType)
 
   // TODO: If bodyType is an interface (or type alias?), generate a schema
   // component object and a reference to it?
   let bodySchema: OpenAPIV3.SchemaObject | undefined
   if (!isUndefinedType(bodyType)) {
-    bodySchema = typeToSchema(checker, location, bodyType)
+    bodySchema = typeToSchema(ctx, bodyType)
     if (!bodySchema) return
   }
 
   const headers = !isUndefinedType(headersType)
-    ? typeToHeaders(checker, headersType)
+    ? typeToHeaders(ctx, headersType)
     : undefined
 
   return {
@@ -333,13 +331,13 @@ const getResponseDefinition = (
 }
 
 const typeToParameters = (
-  checker: ts.TypeChecker,
+  ctx: Context,
   in_: 'path' | 'query' | 'header' | 'cookie',
   type: ts.Type | undefined
 ): OpenAPIV3.ParameterObject[] => {
   if (!type) return []
 
-  const props = checker.getPropertiesOfType(type)
+  const props = ctx.checker.getPropertiesOfType(type)
   return props.map(prop => ({
     name: prop.name,
     in: in_,
@@ -351,9 +349,9 @@ interface Headers {
   [header: string]: OpenAPIV3.HeaderObject
 }
 
-const typeToHeaders = (checker: ts.TypeChecker, type: ts.Type): Headers => {
+const typeToHeaders = (ctx: Context, type: ts.Type): Headers => {
   const result: Headers = {}
-  const props = checker.getPropertiesOfType(type)
+  const props = ctx.checker.getPropertiesOfType(type)
   props.forEach(prop => {
     result[prop.name] = {
       required: !isOptional(prop),
@@ -363,8 +361,7 @@ const typeToHeaders = (checker: ts.TypeChecker, type: ts.Type): Headers => {
 }
 
 const typeToSchema = (
-  checker: ts.TypeChecker,
-  location: ts.Node,
+  ctx: Context,
   type: ts.Type,
   optional = false
 ): OpenAPIV3.SchemaObject | undefined => {
@@ -379,9 +376,7 @@ const typeToSchema = (
     } else if (elems.length >= 2) {
       // 2 or more types remain => anyOf
       return {
-        anyOf: elems
-          .map(elem => typeToSchema(checker, location, elem))
-          .filter(isDefined),
+        anyOf: elems.map(elem => typeToSchema(ctx, elem)).filter(isDefined),
       }
     } else {
       // Only one element left in the union. Fall through and consider it as the
@@ -394,24 +389,22 @@ const typeToSchema = (
     isObjectType(type) ||
     (type.isIntersection() && type.types.every(part => isObjectType(part)))
   ) {
-    const props = checker.getPropertiesOfType(type)
+    const props = ctx.checker.getPropertiesOfType(type)
     return {
       type: 'object',
       required: props.filter(prop => !isOptional(prop)).map(prop => prop.name),
       properties: Object.fromEntries(
         props
           .map(prop => {
-            const propType = checker.getTypeOfSymbolAtLocation(prop, location)
+            const propType = ctx.checker.getTypeOfSymbolAtLocation(
+              prop,
+              ctx.location
+            )
             if (!propType) {
               console.warn('Could not get type for property', prop.name)
               return
             }
-            const propSchema = typeToSchema(
-              checker,
-              location,
-              propType,
-              isOptional(prop)
-            )
+            const propSchema = typeToSchema(ctx, propType, isOptional(prop))
             if (!propSchema) {
               console.warn('Could not get schema for property', prop.name)
               return
@@ -433,6 +426,6 @@ const typeToSchema = (
     return { type: 'boolean' }
   }
 
-  console.warn(`Unknown type, skipping: ${checker.typeToString(type)}`)
+  console.warn(`Unknown type, skipping: ${ctx.checker.typeToString(type)}`)
   return
 }
