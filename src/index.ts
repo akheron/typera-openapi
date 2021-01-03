@@ -334,11 +334,12 @@ const typeToParameters = (
   }))
 }
 
-const typeToHeaders = (
-  checker: ts.TypeChecker,
-  type: ts.Type
-): { [header: string]: OpenAPIV3.HeaderObject } => {
-  const result: { [header: string]: OpenAPIV3.HeaderObject } = {}
+interface Headers {
+  [header: string]: OpenAPIV3.HeaderObject
+}
+
+const typeToHeaders = (checker: ts.TypeChecker, type: ts.Type): Headers => {
+  const result: Headers = {}
   const props = checker.getPropertiesOfType(type)
   props.forEach(prop => {
     result[prop.name] = {
@@ -419,7 +420,7 @@ const typeToSchema = (
     return { type: 'boolean' }
   }
 
-  console.warn('Unknown type, skipping')
+  console.warn(`Unknown type, skipping: ${checker.typeToString(type)}`)
   return
 }
 
