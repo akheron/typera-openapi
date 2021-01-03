@@ -75,16 +75,16 @@ const routeParams: Route<Response.Ok<{ id: number }>> = route
   })
 
 // Request body has a branded type
-const brandedCodec = t.type({ param: NumberFromString })
+// const brandedCodec = t.type({ param: IntFromString })
 
-const brandedRequestBody: Route<
-  Response.Ok<number> | Response.BadRequest<string>
-> = route
-  .post('/branded-request-body')
-  .use(Parser.body(brandedCodec))
-  .handler(async request => {
-    return Response.ok(request.body.param)
-  })
+// const brandedRequestBody: Route<
+//   Response.Ok<number> | Response.BadRequest<string>
+// > = route
+//   .post('/branded-request-body')
+//   .use(Parser.body(brandedCodec))
+//   .handler(async request => {
+//     return Response.ok(request.body.param)
+//   })
 
 // Response headers
 const responseHeaders: Route<
@@ -101,6 +101,6 @@ export default router(
   unusedRequest,
   query,
   routeParams,
-  brandedRequestBody,
+  // brandedRequestBody,
   responseHeaders
 )
