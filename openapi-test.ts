@@ -9,6 +9,14 @@ const constant: Route<Response.Ok<string>> = route
     return Response.ok('bar')
   })
 
+// Direct route() call
+const directRouteCall: Route<Response.Ok<string>> = route(
+  'get',
+  '/direct-route-call'
+).handler(async () => {
+  return Response.ok('bar')
+})
+
 // Request body and multiple response types
 const codec = t.intersection([
   t.type({ str: t.string, requiredBool: t.boolean }),
@@ -95,6 +103,7 @@ const responseHeaders: Route<
 
 export default router(
   constant,
+  directRouteCall,
   requestBody,
   interfaceResponse,
   noExplicitRouteType,

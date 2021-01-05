@@ -175,11 +175,24 @@ const getRouteInput = (
 
   while (ts.isCallExpression(expr)) {
     const lhs: ts.LeftHandSideExpression = expr.expression
-    // const args = expr.arguments
-    if (!ts.isPropertyAccessExpression(lhs)) {
-      ctx.log('warn', 'TODO: direct route call')
-      return
-    } else {
+    if (ts.isIdentifier(lhs)) {
+      // Direct route() call
+      if (expr.arguments.length != 2) {
+        ctx.log('warn', 'Expected 2 arguments for route()')
+        return
+      }
+      const methodArg = expr.arguments[0]
+      const pathArg = expr.arguments[1]
+      if (!ts.isStringLiteral(methodArg) || !ts.isStringLiteral(pathArg)) {
+        ctx.log('warn', 'method and path must be string literals')
+        return
+      }
+      method = methodArg.text
+      path = pathArg.text
+
+      // Property access chain ends
+      break
+    } else if (ts.isPropertyAccessExpression(lhs)) {
       if (!ts.isIdentifier(lhs.name)) return
       const fnName = lhs.name.escapedText.toString()
       if (methodNames.includes(fnName)) {
@@ -214,6 +227,8 @@ const getRouteInput = (
         }
       }
       expr = lhs.expression
+    } else {
+      // Do nothing, I guess
     }
   }
   if (!method) {
