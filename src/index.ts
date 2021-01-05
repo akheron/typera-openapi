@@ -1,6 +1,6 @@
 import * as ts from 'typescript'
 import { OpenAPIV3 } from 'openapi-types'
-import { Context, context, withLocation } from './context'
+import { Context, Logger, context, withLocation } from './context'
 import {
   isDefined,
   isOptional,
@@ -10,6 +10,10 @@ import {
   getPropertyType,
 } from './utils'
 
+interface GenerateOptions {
+  log: Logger
+}
+
 interface Result {
   fileName: string
   paths: OpenAPIV3.PathsObject
@@ -17,8 +21,10 @@ interface Result {
 
 export const generate = (
   fileNames: string[],
-  compilerOptions: ts.CompilerOptions
+  compilerOptions: ts.CompilerOptions,
+  options?: GenerateOptions
 ): Result[] => {
+  const log = options?.log || (() => undefined)
   const program = ts.createProgram(fileNames, compilerOptions)
   const checker = program.getTypeChecker()
 
@@ -29,7 +35,7 @@ export const generate = (
     if (sourceFile.isDeclarationFile) continue
 
     ts.forEachChild(sourceFile, node => {
-      const paths = visit(context(checker, node), node)
+      const paths = visit(context(checker, log, node), node)
       if (paths) {
         result.push({ fileName: sourceFile.fileName, paths })
       }
@@ -171,7 +177,7 @@ const getRouteInput = (
     const lhs: ts.LeftHandSideExpression = expr.expression
     // const args = expr.arguments
     if (!ts.isPropertyAccessExpression(lhs)) {
-      console.warn('TODO: direct route call')
+      ctx.log('warn', 'TODO: direct route call')
       return
     } else {
       if (!ts.isIdentifier(lhs.name)) return
@@ -180,11 +186,11 @@ const getRouteInput = (
         method = fnName
         const pathArg = expr.arguments[0]
         if (!pathArg) {
-          console.warn(`No argument for method ${fnName}`)
+          ctx.log('warn', `No argument for method ${fnName}`)
           return
         }
         if (!ts.isStringLiteral(pathArg)) {
-          console.warn(`Method ${fnName} argument is not a string literal`)
+          ctx.log('warn', `Method ${fnName} argument is not a string literal`)
           return
         }
         path = pathArg.text
@@ -195,7 +201,7 @@ const getRouteInput = (
           (!ts.isArrowFunction(handlerFn) &&
             !ts.isFunctionExpression(handlerFn))
         ) {
-          console.warn('Handler is not a function')
+          ctx.log('warn', 'Handler is not a function')
           return
         }
         const req = handlerFn.parameters[0]
@@ -211,15 +217,15 @@ const getRouteInput = (
     }
   }
   if (!method) {
-    console.warn('Could not determine route method')
+    ctx.log('warn', 'Could not determine route method')
     return
   }
   if (!path) {
-    console.warn('Could not determine route path')
+    ctx.log('warn', 'Could not determine route path')
     return
   }
   if (method === 'all') {
-    console.warn("The 'all' method is not supported, skipping route")
+    ctx.log('warn', "The 'all' method is not supported, skipping route")
     return
   }
   return { method, path, requestNode, body, query, routeParams }
@@ -401,12 +407,12 @@ const typeToSchema = (
               ctx.location
             )
             if (!propType) {
-              console.warn('Could not get type for property', prop.name)
+              ctx.log('warn', 'Could not get type for property', prop.name)
               return
             }
             const propSchema = typeToSchema(ctx, propType, isOptional(prop))
             if (!propSchema) {
-              console.warn('Could not get schema for property', prop.name)
+              ctx.log('warn', 'Could not get schema for property', prop.name)
               return
             }
             return [prop.name, propSchema]
@@ -426,6 +432,6 @@ const typeToSchema = (
     return { type: 'boolean' }
   }
 
-  console.warn(`Unknown type, skipping: ${ctx.checker.typeToString(type)}`)
+  ctx.log('warn', `Unknown type, skipping: ${ctx.checker.typeToString(type)}`)
   return
 }
