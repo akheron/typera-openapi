@@ -35,7 +35,7 @@ export const generate = (
     if (sourceFile.isDeclarationFile) continue
 
     ts.forEachChild(sourceFile, node => {
-      const paths = visit(context(checker, log, node), node)
+      const paths = visit(context(checker, sourceFile, log, node), node)
       if (paths) {
         result.push({ fileName: sourceFile.fileName, paths })
       }
@@ -432,6 +432,6 @@ const typeToSchema = (
     return { type: 'boolean' }
   }
 
-  ctx.log('warn', `Unknown type, skipping: ${ctx.checker.typeToString(type)}`)
+  ctx.log('warn', `Ignoring an unknown type: ${ctx.checker.typeToString(type)}`)
   return
 }
