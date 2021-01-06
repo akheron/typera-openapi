@@ -6,8 +6,13 @@
   "repository": "https://github.com/akheron/typera",
   "author": "Petri Lehtinen <petri@digip.org>",
   "license": "MIT",
+  "files": ["*.js", "*.d.ts"],
+  "bin": {
+    "sqltyper": "cli.js"
+  },
   "scripts": {
-    "start:dev": "ts-node src/cli.ts"
+    "build": "tsc",
+    "prepublishOnly": "yarn build"
   },
   "dependencies": {
     "openapi-types": "^7.0.1",
