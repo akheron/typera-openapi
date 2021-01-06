@@ -1,0 +1,79 @@
+# typera-openapi - typera to OpenAPI generator
+
+![Build](https://github.com/akheron/typera/workflows/Build/badge.svg)
+
+`typera-openapi` is an experimental tool that creates [OpenAPI v3] definitions
+from a project that uses [typera] for routes.
+
+## Getting started
+
+Install typera-openapi:
+
+```sh
+npm install typera-openapi
+```
+
+Your route files must have a single default export that exports a typera router,
+like this:
+
+```typescript
+import { Route, route, router } from 'typera-express'
+
+const myRoute: Route<...> = route.get(...).handler(...)
+// ...
+
+export default router(myRoute, ...)
+```
+
+Run the `typera-openapi` tool giving paths to your route files as command line
+arguments. Assuming you have two route files in your project:
+
+```sh
+npx typera-openapi src/routes/foo.ts src/routes/bar.ts
+```
+
+This cerates `src/routes/foo.openapi.ts` and `src/routes/bar.openapi.ts` which
+contain the OpenAPI definitions.
+
+Use the definitions in your app to serve documentation:
+
+```typescript
+// This is src/app.ts
+import * as express from 'express'
+import { OpenAPIV3 } from 'openapi-types'
+import * as swaggerUi from 'swagger-ui-express'
+import { prefix } from 'typera-openapi'
+
+import foo from './routes/foo'
+import fooDefs from './routes/foo.openapi'
+import bar from './routes/bar'
+import barDefs from './routes/bar.openapi'
+
+const openapiDoc: OpenAPIV3.Document = {
+  openapi: '3.0.0',
+  info: {
+    title: 'My cool API',
+    version: '0.1.0',
+  },
+  paths: {
+    ...prefix('/foo', fooDefs.paths),
+    ...prefix('/bar', barDefs.paths),
+  },
+}
+
+const app = express()
+app.use('/foo', foo.handler())
+app.use('/bar', bar.handler())
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiDoc))
+
+app.listen(3000, () => {
+  console.log('Listening on 127.0.0.1:3000')
+})
+```
+
+The `prefix` function is used to move OpenAPI path definitions to a different
+prefix, because the `foo` and `bar` routes are served from their respecive
+prefixes.
+
+[openapi v3]: https://swagger.io/specification/
+[typera]: https://github.com/akheron/typera
