@@ -1,0 +1,256 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generate works 1`] = `
+Array [
+  Object {
+    "fileName": "packages/typera-openapi/tests/test-routes.ts",
+    "paths": Object {
+      "/constant": Object {
+        "get": Object {
+          "parameters": undefined,
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "200",
+            },
+          },
+        },
+      },
+      "/direct-route-call": Object {
+        "get": Object {
+          "parameters": undefined,
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "200",
+            },
+          },
+        },
+      },
+      "/interface-response": Object {
+        "get": Object {
+          "parameters": undefined,
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "properties": Object {
+                      "petName": Object {
+                        "type": "string",
+                      },
+                      "shoeSize": Object {
+                        "type": "number",
+                      },
+                    },
+                    "required": Array [
+                      "shoeSize",
+                      "petName",
+                    ],
+                    "type": "object",
+                  },
+                },
+              },
+              "description": "200",
+            },
+          },
+        },
+      },
+      "/no-explicit-route-type": Object {
+        "get": Object {
+          "parameters": undefined,
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "200",
+            },
+          },
+        },
+      },
+      "/query": Object {
+        "get": Object {
+          "parameters": Array [
+            Object {
+              "in": "query",
+              "name": "str",
+              "required": true,
+            },
+            Object {
+              "in": "query",
+              "name": "num",
+              "required": false,
+            },
+          ],
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "200",
+            },
+            "400": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "400",
+            },
+          },
+        },
+      },
+      "/request-body": Object {
+        "post": Object {
+          "parameters": undefined,
+          "requestBody": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "properties": Object {
+                    "optionalBool": Object {
+                      "type": "boolean",
+                    },
+                    "requiredBool": Object {
+                      "type": "boolean",
+                    },
+                    "str": Object {
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "str",
+                    "requiredBool",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          },
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "200",
+            },
+            "201": Object {
+              "description": "201",
+            },
+            "400": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "400",
+            },
+          },
+        },
+      },
+      "/response-headers": Object {
+        "get": Object {
+          "parameters": undefined,
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "200",
+              "headers": Object {
+                "X-Bar": Object {
+                  "required": false,
+                },
+                "X-Foo": Object {
+                  "required": true,
+                },
+              },
+            },
+          },
+        },
+      },
+      "/unused-request": Object {
+        "get": Object {
+          "parameters": undefined,
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "200",
+            },
+          },
+        },
+      },
+      "/user/{id}": Object {
+        "get": Object {
+          "parameters": Array [
+            Object {
+              "in": "path",
+              "name": "id",
+              "required": true,
+            },
+          ],
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "properties": Object {
+                      "id": Object {
+                        "type": "number",
+                      },
+                    },
+                    "required": Array [
+                      "id",
+                    ],
+                    "type": "object",
+                  },
+                },
+              },
+              "description": "200",
+            },
+          },
+        },
+      },
+    },
+  },
+]
+`;
