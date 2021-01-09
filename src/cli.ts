@@ -10,7 +10,7 @@ const log: Logger = (location, level, ...args) =>
 type Format = 'ts' | 'json'
 
 const parseArgs = () =>
-  yargs.option('format', {
+  yargs.usage('Usage: $0 [options] FILE...').option('format', {
     description: 'Output file format',
     choices: ['ts' as const, 'json' as const],
     default: 'ts' as Format,
@@ -22,7 +22,7 @@ const outputFileName = (sourceFileName: string, ext: string): string =>
 const main = () => {
   const args = parseArgs()
 
-  const sourceFiles = args._
+  const sourceFiles = args._.map(x => x.toString())
   const ext = args.format === 'ts' ? '.openapi.ts' : '.json'
 
   const results = generate(sourceFiles, { strict: true }, { log }).map(

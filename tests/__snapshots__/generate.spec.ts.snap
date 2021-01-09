@@ -3,7 +3,7 @@
 exports[`generate works 1`] = `
 Array [
   Object {
-    "fileName": "packages/typera-openapi/tests/test-routes.ts",
+    "fileName": "tests/test-routes.ts",
     "paths": Object {
       "/constant": Object {
         "get": Object {

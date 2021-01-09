@@ -58,6 +58,7 @@ const noExplicitRouteType = route
 // The handler's request parameter is unused
 const unusedRequest: Route<Response.Ok<string>> = route
   .get('/unused-request')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   .handler(async request => {
     return Response.ok('xyzzy')
   })
