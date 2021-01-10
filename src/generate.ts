@@ -126,7 +126,7 @@ const getRouteDeclaration = (
     pathTemplate,
     {
       [method]: {
-        parameters: parameters.length > 0 ? parameters : undefined,
+        ...(parameters.length > 0 ? { parameters } : undefined),
         ...operationRequestBody(requestBody),
         responses,
       },
@@ -395,7 +395,7 @@ const typeToSchema = (
   type: ts.Type,
   optional = false
 ): OpenAPIV3.SchemaObject | undefined => {
-  let nullable: { nullable?: true } = {}
+  let nullable: { nullable: true } | undefined
 
   if (type.isUnion()) {
     let elems = type.types

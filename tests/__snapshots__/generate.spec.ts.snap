@@ -7,7 +7,6 @@ Array [
     "paths": Object {
       "/branded-request-body": Object {
         "post": Object {
-          "parameters": undefined,
           "requestBody": Object {
             "content": Object {
               "application/json": Object {
@@ -51,7 +50,6 @@ Array [
       },
       "/constant": Object {
         "get": Object {
-          "parameters": undefined,
           "responses": Object {
             "200": Object {
               "content": Object {
@@ -68,7 +66,6 @@ Array [
       },
       "/direct-route-call": Object {
         "get": Object {
-          "parameters": undefined,
           "responses": Object {
             "200": Object {
               "content": Object {
@@ -85,7 +82,6 @@ Array [
       },
       "/interface-response": Object {
         "get": Object {
-          "parameters": undefined,
           "responses": Object {
             "200": Object {
               "content": Object {
@@ -115,7 +111,6 @@ Array [
       },
       "/no-explicit-route-type": Object {
         "get": Object {
-          "parameters": undefined,
           "responses": Object {
             "200": Object {
               "content": Object {
@@ -170,7 +165,6 @@ Array [
       },
       "/request-body": Object {
         "post": Object {
-          "parameters": undefined,
           "requestBody": Object {
             "content": Object {
               "application/json": Object {
@@ -272,7 +266,6 @@ Array [
       },
       "/response-headers": Object {
         "get": Object {
-          "parameters": undefined,
           "responses": Object {
             "200": Object {
               "content": Object {
@@ -297,7 +290,6 @@ Array [
       },
       "/unused-request": Object {
         "get": Object {
-          "parameters": undefined,
           "responses": Object {
             "200": Object {
               "content": Object {
