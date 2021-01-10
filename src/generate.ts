@@ -8,6 +8,8 @@ import {
   isUndefinedType,
   isPackageSymbol,
   getPropertyType,
+  isNullType,
+  isBooleanLiteralType,
 } from './utils'
 
 interface GenerateOptions {
@@ -386,12 +388,22 @@ const typeToSchema = (
   type: ts.Type,
   optional = false
 ): OpenAPIV3.SchemaObject | undefined => {
-  if (type.isUnion()) {
-    const elems = optional
-      ? type.types.filter(elem => !isUndefinedType(elem))
-      : type.types
+  let nullable: { nullable?: true } = {}
 
-    if (elems.every(elem => elem.flags & ts.TypeFlags.BooleanLiteral)) {
+  if (type.isUnion()) {
+    let elems = type.types
+
+    if (optional) {
+      elems = type.types.filter(elem => !isUndefinedType(elem))
+    }
+
+    if (elems.some(isNullType)) {
+      // One of the union elements is null
+      nullable = { nullable: true }
+      elems = elems.filter(elem => !isNullType(elem))
+    }
+
+    if (elems.every(isBooleanLiteralType)) {
       // All elements are boolean literals => boolean
       return { type: 'boolean' }
     } else if (elems.length >= 2) {
@@ -414,6 +426,7 @@ const typeToSchema = (
     return {
       type: 'object',
       required: props.filter(prop => !isOptional(prop)).map(prop => prop.name),
+      ...nullable,
       properties: Object.fromEntries(
         props
           .map(prop => {
@@ -438,13 +451,13 @@ const typeToSchema = (
   }
 
   if (type.flags & ts.TypeFlags.String) {
-    return { type: 'string' }
+    return { type: 'string', ...nullable }
   }
   if (type.flags & ts.TypeFlags.Number) {
-    return { type: 'number' }
+    return { type: 'number', ...nullable }
   }
   if (type.flags & ts.TypeFlags.Boolean) {
-    return { type: 'boolean' }
+    return { type: 'boolean', ...nullable }
   }
 
   ctx.log('warn', `Ignoring an unknown type: ${ctx.checker.typeToString(type)}`)

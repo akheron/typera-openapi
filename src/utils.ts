@@ -7,8 +7,12 @@ export const isOptional = (symbol: ts.Symbol): boolean =>
   !!(symbol.flags & ts.SymbolFlags.Optional)
 export const isObjectType = (type: ts.Type): boolean =>
   !!(type.flags & ts.TypeFlags.Object)
+export const isBooleanLiteralType = (type: ts.Type): boolean =>
+  !!(type.flags & ts.TypeFlags.BooleanLiteral)
 export const isUndefinedType = (type: ts.Type): boolean =>
   !!(type.flags & ts.TypeFlags.Undefined)
+export const isNullType = (type: ts.Type): boolean =>
+  !!(type.flags & ts.TypeFlags.Null)
 
 export const getPropertyType = (
   checker: ts.TypeChecker,

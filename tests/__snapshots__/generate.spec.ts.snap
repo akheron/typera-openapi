@@ -49,6 +49,7 @@ Array [
                   "schema": Object {
                     "properties": Object {
                       "petName": Object {
+                        "nullable": true,
                         "type": "string",
                       },
                       "shoeSize": Object {
@@ -131,6 +132,22 @@ Array [
               "application/json": Object {
                 "schema": Object {
                   "properties": Object {
+                    "nullableNum": Object {
+                      "nullable": true,
+                      "type": "number",
+                    },
+                    "nullableObj": Object {
+                      "nullable": true,
+                      "properties": Object {
+                        "foo": Object {
+                          "type": "number",
+                        },
+                      },
+                      "required": Array [
+                        "foo",
+                      ],
+                      "type": "object",
+                    },
                     "optionalBool": Object {
                       "type": "boolean",
                     },
@@ -144,6 +161,8 @@ Array [
                   "required": Array [
                     "str",
                     "requiredBool",
+                    "nullableNum",
+                    "nullableObj",
                   ],
                   "type": "object",
                 },

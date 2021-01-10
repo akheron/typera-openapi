@@ -19,7 +19,17 @@ const directRouteCall: Route<Response.Ok<string>> = route(
 
 // Request body and multiple response types
 const codec = t.intersection([
-  t.type({ str: t.string, requiredBool: t.boolean }),
+  t.type({
+    str: t.string,
+    requiredBool: t.boolean,
+    nullableNum: t.union([t.number, t.null]),
+    nullableObj: t.union([
+      t.type({
+        foo: t.number,
+      }),
+      t.null,
+    ]),
+  }),
   t.partial({ optionalBool: t.boolean }),
 ])
 
@@ -39,7 +49,7 @@ const requestBody: Route<
 // Response body is a custom interface
 interface User {
   shoeSize: number
-  petName: string
+  petName: string | null
 }
 
 const interfaceResponse: Route<Response.Ok<User>> = route
