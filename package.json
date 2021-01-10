@@ -11,7 +11,7 @@
   ],
   "typings": "./dist/index.d.ts",
   "bin": {
-    "sqltyper": "./dist/cli.js"
+    "typera-openapi": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
