@@ -55,7 +55,7 @@ Array [
           "responses": Object {
             "200": Object {
               "content": Object {
-                "application/json": Object {
+                "text/plain": Object {
                   "schema": Object {
                     "type": "string",
                   },
@@ -72,7 +72,7 @@ Array [
           "responses": Object {
             "200": Object {
               "content": Object {
-                "application/json": Object {
+                "text/plain": Object {
                   "schema": Object {
                     "type": "string",
                   },
@@ -119,7 +119,7 @@ Array [
           "responses": Object {
             "200": Object {
               "content": Object {
-                "application/json": Object {
+                "text/plain": Object {
                   "schema": Object {
                     "type": "string",
                   },
@@ -147,7 +147,7 @@ Array [
           "responses": Object {
             "200": Object {
               "content": Object {
-                "application/json": Object {
+                "text/plain": Object {
                   "schema": Object {
                     "type": "string",
                   },
@@ -157,7 +157,7 @@ Array [
             },
             "400": Object {
               "content": Object {
-                "application/json": Object {
+                "text/plain": Object {
                   "schema": Object {
                     "type": "string",
                   },
@@ -246,7 +246,7 @@ Array [
           "responses": Object {
             "200": Object {
               "content": Object {
-                "application/json": Object {
+                "text/plain": Object {
                   "schema": Object {
                     "type": "string",
                   },
@@ -259,7 +259,7 @@ Array [
             },
             "400": Object {
               "content": Object {
-                "application/json": Object {
+                "text/plain": Object {
                   "schema": Object {
                     "type": "string",
                   },
@@ -276,7 +276,7 @@ Array [
           "responses": Object {
             "200": Object {
               "content": Object {
-                "application/json": Object {
+                "text/plain": Object {
                   "schema": Object {
                     "type": "string",
                   },
@@ -301,7 +301,7 @@ Array [
           "responses": Object {
             "200": Object {
               "content": Object {
-                "application/json": Object {
+                "text/plain": Object {
                   "schema": Object {
                     "type": "string",
                   },

@@ -7,6 +7,12 @@ export const isOptional = (symbol: ts.Symbol): boolean =>
   !!(symbol.flags & ts.SymbolFlags.Optional)
 export const isObjectType = (type: ts.Type): boolean =>
   !!(type.flags & ts.TypeFlags.Object)
+export const isStringType = (type: ts.Type): boolean =>
+  !!(type.flags & ts.TypeFlags.String)
+export const isNumberType = (type: ts.Type): boolean =>
+  !!(type.flags & ts.TypeFlags.Number)
+export const isBooleanType = (type: ts.Type): boolean =>
+  !!(type.flags & ts.TypeFlags.Boolean)
 export const isBooleanLiteralType = (type: ts.Type): boolean =>
   !!(type.flags & ts.TypeFlags.BooleanLiteral)
 export const isNumberLiteralType = (

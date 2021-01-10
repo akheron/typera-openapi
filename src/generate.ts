@@ -9,6 +9,9 @@ import {
   isPackageSymbol,
   getPropertyType,
   isNullType,
+  isStringType,
+  isNumberType,
+  isBooleanType,
   isBooleanLiteralType,
   isNumberLiteralType,
   isStringLiteralType,
@@ -338,12 +341,14 @@ const getResponseDefinition = (
       description: status, // TODO: What should the response description be?
       ...(bodySchema
         ? {
-            content: {
-              // TODO: application/json should probably not be hard-coded
-              'application/json': {
-                schema: bodySchema,
-              },
-            },
+            content:
+              isStringType(bodyType) || isNumberType(bodyType)
+                ? { 'text/plain': { schema: bodySchema } }
+                : {
+                    'application/json': {
+                      schema: bodySchema,
+                    },
+                  },
           }
         : undefined),
       ...(headers
@@ -467,13 +472,13 @@ const typeToSchema = (
     }
   }
 
-  if (type.flags & ts.TypeFlags.String) {
+  if (isStringType(type)) {
     return { type: 'string', ...nullable }
   }
-  if (type.flags & ts.TypeFlags.Number) {
+  if (isNumberType(type)) {
     return { type: 'number', ...nullable }
   }
-  if (type.flags & ts.TypeFlags.Boolean) {
+  if (isBooleanType(type)) {
     return { type: 'boolean', ...nullable }
   }
   if (isStringLiteralType(type)) {
