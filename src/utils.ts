@@ -9,6 +9,12 @@ export const isObjectType = (type: ts.Type): boolean =>
   !!(type.flags & ts.TypeFlags.Object)
 export const isBooleanLiteralType = (type: ts.Type): boolean =>
   !!(type.flags & ts.TypeFlags.BooleanLiteral)
+export const isNumberLiteralType = (
+  type: ts.Type
+): type is ts.NumberLiteralType => !!(type.flags & ts.TypeFlags.NumberLiteral)
+export const isStringLiteralType = (
+  type: ts.Type
+): type is ts.StringLiteralType => !!(type.flags & ts.TypeFlags.StringLiteral)
 export const isUndefinedType = (type: ts.Type): boolean =>
   !!(type.flags & ts.TypeFlags.Undefined)
 export const isNullType = (type: ts.Type): boolean =>

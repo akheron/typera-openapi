@@ -29,6 +29,10 @@ const codec = t.intersection([
       }),
       t.null,
     ]),
+    numLit: t.literal(42),
+    numLits: t.union([t.literal(42), t.literal(123)]),
+    strLit: t.literal('foo'),
+    strLits: t.union([t.literal('foo'), t.literal('bar')]),
   }),
   t.partial({ optionalBool: t.boolean }),
 ])

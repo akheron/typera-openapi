@@ -148,6 +148,19 @@ Array [
                       ],
                       "type": "object",
                     },
+                    "numLit": Object {
+                      "enum": Array [
+                        42,
+                      ],
+                      "type": "number",
+                    },
+                    "numLits": Object {
+                      "enum": Array [
+                        42,
+                        123,
+                      ],
+                      "type": "number",
+                    },
                     "optionalBool": Object {
                       "type": "boolean",
                     },
@@ -157,12 +170,29 @@ Array [
                     "str": Object {
                       "type": "string",
                     },
+                    "strLit": Object {
+                      "enum": Array [
+                        "foo",
+                      ],
+                      "type": "string",
+                    },
+                    "strLits": Object {
+                      "enum": Array [
+                        "foo",
+                        "bar",
+                      ],
+                      "type": "string",
+                    },
                   },
                   "required": Array [
                     "str",
                     "requiredBool",
                     "nullableNum",
                     "nullableObj",
+                    "numLit",
+                    "numLits",
+                    "strLit",
+                    "strLits",
                   ],
                   "type": "object",
                 },

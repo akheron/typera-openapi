@@ -10,6 +10,8 @@ import {
   getPropertyType,
   isNullType,
   isBooleanLiteralType,
+  isNumberLiteralType,
+  isStringLiteralType,
 } from './utils'
 
 interface GenerateOptions {
@@ -405,11 +407,26 @@ const typeToSchema = (
 
     if (elems.every(isBooleanLiteralType)) {
       // All elements are boolean literals => boolean
-      return { type: 'boolean' }
+      return { type: 'boolean', ...nullable }
+    } else if (elems.every(isNumberLiteralType)) {
+      // All elements are number literals => enum
+      return {
+        type: 'number',
+        enum: elems.map(elem => elem.value),
+        ...nullable,
+      }
+    } else if (elems.every(isStringLiteralType)) {
+      // All elements are string literals => enum
+      return {
+        type: 'string',
+        enum: elems.map(elem => elem.value),
+        ...nullable,
+      }
     } else if (elems.length >= 2) {
       // 2 or more types remain => anyOf
       return {
         anyOf: elems.map(elem => typeToSchema(ctx, elem)).filter(isDefined),
+        ...nullable,
       }
     } else {
       // Only one element left in the union. Fall through and consider it as the
@@ -458,6 +475,12 @@ const typeToSchema = (
   }
   if (type.flags & ts.TypeFlags.Boolean) {
     return { type: 'boolean', ...nullable }
+  }
+  if (isStringLiteralType(type)) {
+    return { type: 'string', enum: [type.value], ...nullable }
+  }
+  if (isNumberLiteralType(type)) {
+    return { type: 'number', enum: [type.value], ...nullable }
   }
 
   ctx.log('warn', `Ignoring an unknown type: ${ctx.checker.typeToString(type)}`)
