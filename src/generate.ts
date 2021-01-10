@@ -483,6 +483,12 @@ const typeToSchema = (
     return { type: 'number', enum: [type.value], ...nullable }
   }
 
-  ctx.log('warn', `Ignoring an unknown type: ${ctx.checker.typeToString(type)}`)
+  const typeStr = ctx.checker.typeToString(type)
+  if (typeStr === 'Branded<number, IntBrand>') {
+    // io-ts int
+    return { type: 'integer', ...nullable }
+  }
+
+  ctx.log('warn', `Ignoring an unknown type: ${typeStr}`)
   return
 }

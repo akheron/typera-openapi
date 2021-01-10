@@ -5,6 +5,50 @@ Array [
   Object {
     "fileName": "tests/test-routes.ts",
     "paths": Object {
+      "/branded-request-body": Object {
+        "post": Object {
+          "parameters": undefined,
+          "requestBody": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "properties": Object {
+                    "param": Object {
+                      "type": "integer",
+                    },
+                  },
+                  "required": Array [
+                    "param",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          },
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "text/plain": Object {
+                  "schema": Object {
+                    "type": "number",
+                  },
+                },
+              },
+              "description": "200",
+            },
+            "400": Object {
+              "content": Object {
+                "text/plain": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "400",
+            },
+          },
+        },
+      },
       "/constant": Object {
         "get": Object {
           "parameters": undefined,
