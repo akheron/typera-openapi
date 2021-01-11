@@ -41,7 +41,7 @@ export const generate = (
     if (!fileNames.includes(sourceFile.fileName)) continue
     if (sourceFile.isDeclarationFile) continue
 
-    ts.forEachChild(sourceFile, node => {
+    ts.forEachChild(sourceFile, (node) => {
       const paths = visit(context(checker, sourceFile, log, node), node)
       if (paths) {
         result.push({ fileName: sourceFile.fileName, paths })
@@ -63,7 +63,7 @@ const visit = (
 
     const paths: OpenAPIV3.PathsObject = {}
 
-    argSymbols.forEach(symbol => {
+    argSymbols.forEach((symbol) => {
       const location = symbol.valueDeclaration
       const routeDeclaration = getRouteDeclaration(
         withLocation(ctx, location),
@@ -92,7 +92,7 @@ const getRouterCallArgSymbols = (
 
   const argSymbols = args
     .filter(ts.isIdentifier)
-    .map(arg => ctx.checker.getSymbolAtLocation(arg))
+    .map((arg) => ctx.checker.getSymbolAtLocation(arg))
     .filter(isDefined)
 
   if (argSymbols.length !== args.length) return
@@ -280,7 +280,7 @@ const getResponseTypes = (
     const responseDef = getResponseDefinition(ctx, responseType)
     if (responseDef) result[responseDef.status] = responseDef.response
   } else if (responseType.isUnion()) {
-    responseType.types.forEach(type => {
+    responseType.types.forEach((type) => {
       const responseDef = getResponseDefinition(ctx, type)
       if (responseDef) result[responseDef.status] = responseDef.response
     })
@@ -368,7 +368,7 @@ const typeToParameters = (
   if (!type) return []
 
   const props = ctx.checker.getPropertiesOfType(type)
-  return props.map(prop => ({
+  return props.map((prop) => ({
     name: prop.name,
     in: in_,
     required: in_ === 'path' ? true : !isOptional(prop),
@@ -382,7 +382,7 @@ interface Headers {
 const typeToHeaders = (ctx: Context, type: ts.Type): Headers => {
   const result: Headers = {}
   const props = ctx.checker.getPropertiesOfType(type)
-  props.forEach(prop => {
+  props.forEach((prop) => {
     result[prop.name] = {
       required: !isOptional(prop),
     }
@@ -401,13 +401,13 @@ const typeToSchema = (
     let elems = type.types
 
     if (optional) {
-      elems = type.types.filter(elem => !isUndefinedType(elem))
+      elems = type.types.filter((elem) => !isUndefinedType(elem))
     }
 
     if (elems.some(isNullType)) {
       // One of the union elements is null
       nullable = { nullable: true }
-      elems = elems.filter(elem => !isNullType(elem))
+      elems = elems.filter((elem) => !isNullType(elem))
     }
 
     if (elems.every(isBooleanLiteralType)) {
@@ -417,20 +417,20 @@ const typeToSchema = (
       // All elements are number literals => enum
       return {
         type: 'number',
-        enum: elems.map(elem => elem.value),
+        enum: elems.map((elem) => elem.value),
         ...nullable,
       }
     } else if (elems.every(isStringLiteralType)) {
       // All elements are string literals => enum
       return {
         type: 'string',
-        enum: elems.map(elem => elem.value),
+        enum: elems.map((elem) => elem.value),
         ...nullable,
       }
     } else if (elems.length >= 2) {
       // 2 or more types remain => anyOf
       return {
-        anyOf: elems.map(elem => typeToSchema(ctx, elem)).filter(isDefined),
+        anyOf: elems.map((elem) => typeToSchema(ctx, elem)).filter(isDefined),
         ...nullable,
       }
     } else {
@@ -442,16 +442,18 @@ const typeToSchema = (
 
   if (
     isObjectType(type) ||
-    (type.isIntersection() && type.types.every(part => isObjectType(part)))
+    (type.isIntersection() && type.types.every((part) => isObjectType(part)))
   ) {
     const props = ctx.checker.getPropertiesOfType(type)
     return {
       type: 'object',
-      required: props.filter(prop => !isOptional(prop)).map(prop => prop.name),
+      required: props
+        .filter((prop) => !isOptional(prop))
+        .map((prop) => prop.name),
       ...nullable,
       properties: Object.fromEntries(
         props
-          .map(prop => {
+          .map((prop) => {
             const propType = ctx.checker.getTypeOfSymbolAtLocation(
               prop,
               ctx.location

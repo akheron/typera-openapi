@@ -42,7 +42,7 @@ const requestBody: Route<
 > = route
   .post('/request-body')
   .use(Parser.body(codec))
-  .handler(async request => {
+  .handler(async (request) => {
     if (request.body.optionalBool) {
       return Response.ok(request.body.str)
     } else {
@@ -73,7 +73,7 @@ const noExplicitRouteType = route
 const unusedRequest: Route<Response.Ok<string>> = route
   .get('/unused-request')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  .handler(async request => {
+  .handler(async (request) => {
     return Response.ok('xyzzy')
   })
 
@@ -86,14 +86,14 @@ const queryCodec = t.intersection([
 const query: Route<Response.Ok<string> | Response.BadRequest<string>> = route
   .get('/query')
   .use(Parser.query(queryCodec))
-  .handler(async request => {
+  .handler(async (request) => {
     return Response.ok(request.query.str)
   })
 
 // Route params
 const routeParams: Route<Response.Ok<{ id: number }>> = route
   .get('/user/:id(int)')
-  .handler(async request => {
+  .handler(async (request) => {
     return Response.ok({ id: request.routeParams.id })
   })
 
@@ -105,7 +105,7 @@ const brandedRequestBody: Route<
 > = route
   .post('/branded-request-body')
   .use(Parser.body(brandedCodec))
-  .handler(async request => {
+  .handler(async (request) => {
     return Response.ok(request.body.param)
   })
 

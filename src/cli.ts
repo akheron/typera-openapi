@@ -23,11 +23,11 @@ const outputFileName = (sourceFileName: string, ext: string): string =>
 const main = () => {
   const args = parseArgs()
 
-  const sourceFiles = args._.map(x => x.toString())
+  const sourceFiles = args._.map((x) => x.toString())
   const ext = args.format === 'ts' ? '.openapi.ts' : '.json'
 
   const results = generate(sourceFiles, { strict: true }, { log }).map(
-    result => ({
+    (result) => ({
       ...result,
       outputFileName: outputFileName(result.fileName, ext),
     })

@@ -15,7 +15,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "lint": "eslint '**/*.ts'",
+    "lint": "eslint '**/*.ts' && prettier --check \"**/*.{json,md}\"",
+    "lint:fix": "eslint --fix '**/*.ts' && prettier --write '**/*.{json,md}'",
     "test": "jest",
     "prepublishOnly": "yarn build"
   },
