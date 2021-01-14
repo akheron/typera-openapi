@@ -103,6 +103,7 @@ const getRouteDeclaration = (
   ctx: Context,
   symbol: ts.Symbol
 ): [string, OpenAPIV3.PathItemObject] | undefined => {
+  const description = getRouteDescription(ctx, symbol)
   const routeInput = getRouteInput(ctx, symbol)
   if (!routeInput) return
   const { method, path, requestNode, body, query, routeParams } = routeInput
@@ -126,6 +127,7 @@ const getRouteDeclaration = (
     pathTemplate,
     {
       [method]: {
+        ...(description ? { description } : undefined),
         ...(parameters.length > 0 ? { parameters } : undefined),
         ...operationRequestBody(requestBody),
         responses,
@@ -133,6 +135,12 @@ const getRouteDeclaration = (
     },
   ]
 }
+
+const getRouteDescription = (ctx: Context, symbol: ts.Symbol) =>
+  symbol
+    .getDocumentationComment(ctx.checker)
+    .map((part) => part.text)
+    .join('')
 
 const operationRequestBody = (
   contentSchema: OpenAPIV3.SchemaObject | undefined
@@ -257,6 +265,8 @@ const getResponseTypes = (
   ctx: Context,
   symbol: ts.Symbol
 ): OpenAPIV3.ResponsesObject | undefined => {
+  const descriptions = getResponseDescriptions(symbol)
+
   const routeType = ctx.checker.getTypeOfSymbolAtLocation(
     symbol,
     symbol.valueDeclaration
@@ -277,11 +287,11 @@ const getResponseTypes = (
 
   const result: OpenAPIV3.ResponsesObject = {}
   if (isObjectType(responseType)) {
-    const responseDef = getResponseDefinition(ctx, responseType)
+    const responseDef = getResponseDefinition(ctx, descriptions, responseType)
     if (responseDef) result[responseDef.status] = responseDef.response
   } else if (responseType.isUnion()) {
     responseType.types.forEach((type) => {
-      const responseDef = getResponseDefinition(ctx, type)
+      const responseDef = getResponseDefinition(ctx, descriptions, type)
       if (responseDef) result[responseDef.status] = responseDef.response
     })
   }
@@ -294,8 +304,26 @@ const getResponseTypes = (
   return result
 }
 
+const getResponseDescriptions = (
+  symbol: ts.Symbol
+): Partial<Record<string, string>> =>
+  Object.fromEntries(
+    symbol
+      .getJsDocTags()
+      .filter((tag) => tag.name === 'response')
+      .map((tag) => tag.text)
+      .filter(isDefined)
+      .map((text) => {
+        const match = /(\d{3}) (.+)/.exec(text)
+        if (!match) return undefined
+        return [match[1], match[2]] as const
+      })
+      .filter(isDefined)
+  )
+
 const getResponseDefinition = (
   ctx: Context,
+  descriptions: Partial<Record<string, string>>,
   responseType: ts.Type
 ): { status: string; response: OpenAPIV3.ResponseObject } | undefined => {
   const statusSymbol = responseType.getProperty('status')
@@ -335,10 +363,16 @@ const getResponseDefinition = (
     ? typeToHeaders(ctx, headersType)
     : undefined
 
+  let description = descriptions[status]
+  if (!description) {
+    ctx.log('warn', `No description for response ${status}`)
+    description = status
+  }
+
   return {
     status,
     response: {
-      description: status, // TODO: What should the response description be?
+      description,
       ...(bodySchema
         ? {
             content:

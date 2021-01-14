@@ -2,7 +2,11 @@ import { Parser, Response, Route, route, router } from 'typera-express'
 import * as t from 'io-ts'
 import { IntFromString, NumberFromString } from 'io-ts-types'
 
-// No input and static output
+/**
+ * No input, static output
+ *
+ * @response 200 Successful result
+ */
 const constant: Route<Response.Ok<string>> = route
   .get('/constant')
   .handler(async () => {
@@ -37,6 +41,13 @@ const codec = t.intersection([
   t.partial({ optionalBool: t.boolean }),
 ])
 
+/**
+ * This one has request body and two possible successful responses
+ *
+ * @response 200 Successful result
+ * @response 201 A new resource was created
+ * @response 400 Validation error
+ */
 const requestBody: Route<
   Response.Ok<string> | Response.Created | Response.BadRequest<string>
 > = route
