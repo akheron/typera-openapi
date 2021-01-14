@@ -13,17 +13,31 @@ Install typera-openapi:
 npm install typera-openapi
 ```
 
-Your route files must have a single default export that exports a typera router,
-like this:
+Your route files must have a single default export that exports a typera router.
+JSDoc comments serve as additional documentation:
 
 ```typescript
 import { Route, route, router } from 'typera-express'
 
-const myRoute: Route<...> = route.get(...).handler(...)
+/**
+ * The JSDoc text is used as a description for the route (optional).
+ *
+ * @response 200 Success response description.
+ * @response 400 Another description for a response. This one
+ * spans multile lines.
+ */
+const myRoute: Route<Response.Ok<string> | Response.BadRequest<string>> =
+  route.get(...).handler(...)
+
 // ...
 
 export default router(myRoute, ...)
 ```
+
+In the OpenAPI v3 spec, the `description` field of a
+[Response Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#responseObject)
+is required, so `typera-openapi` prints a warning if a JSDoc tag for a response
+is not found.
 
 Run the `typera-openapi` tool giving paths to your route files as command line
 arguments. Assuming you have two route files in your project:

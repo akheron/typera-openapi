@@ -1,6 +1,6 @@
 import * as ts from 'typescript'
 
-type LogLevel = 'verbose' | 'info' | 'warn' | 'error'
+export type LogLevel = 'verbose' | 'info' | 'warn' | 'error'
 
 export type Logger = (
   location: string,

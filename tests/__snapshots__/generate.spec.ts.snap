@@ -1,5 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`generate warnings 1`] = `
+Array [
+  Object {
+    "level": "warn",
+    "location": "tests/warning-routes.ts:3:6",
+    "message": "No description for response 200",
+  },
+]
+`;
+
 exports[`generate works 1`] = `
 Array [
   Object {
@@ -50,6 +60,7 @@ Array [
       },
       "/constant": Object {
         "get": Object {
+          "description": "No input, static output",
           "responses": Object {
             "200": Object {
               "content": Object {
@@ -59,7 +70,7 @@ Array [
                   },
                 },
               },
-              "description": "200",
+              "description": "Successful result",
             },
           },
         },
@@ -165,6 +176,7 @@ Array [
       },
       "/request-body": Object {
         "post": Object {
+          "description": "This one has request body and two possible successful responses",
           "requestBody": Object {
             "content": Object {
               "application/json": Object {
@@ -246,10 +258,10 @@ Array [
                   },
                 },
               },
-              "description": "200",
+              "description": "Successful result",
             },
             "201": Object {
-              "description": "201",
+              "description": "A new resource was created",
             },
             "400": Object {
               "content": Object {
@@ -259,7 +271,7 @@ Array [
                   },
                 },
               },
-              "description": "400",
+              "description": "Validation error",
             },
           },
         },
