@@ -24,7 +24,7 @@ const main = () => {
   const args = parseArgs()
 
   const sourceFiles = args._.map((x) => x.toString())
-  const ext = args.format === 'ts' ? '.openapi.ts' : '.json'
+  const ext = `.openapi.${args.format}`
 
   const results = generate(sourceFiles, { strict: true }, { log }).map(
     (result) => ({
