@@ -46,7 +46,7 @@ arguments. Assuming you have two route files in your project:
 npx typera-openapi src/routes/foo.ts src/routes/bar.ts
 ```
 
-This cerates `src/routes/foo.openapi.ts` and `src/routes/bar.openapi.ts` which
+This creates `src/routes/foo.openapi.ts` and `src/routes/bar.openapi.ts` which
 contain the OpenAPI definitions.
 
 Use the definitions in your app to serve documentation:
