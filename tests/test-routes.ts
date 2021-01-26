@@ -5,7 +5,7 @@ import { IntFromString, NumberFromString } from 'io-ts-types'
 /**
  * No input, static output
  *
- * @tags Patients
+ * @tags Tag
  *
  * @summary This is a summary
  *
