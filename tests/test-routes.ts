@@ -73,6 +73,15 @@ const interfaceResponse: Route<Response.Ok<User>> = route
     return Response.ok({ shoeSize: 10, petName: 'John' })
   })
 
+const interfaceArrayResponse: Route<Response.Ok<User[]>> = route
+  .get('/interface-array-response')
+  .handler(async () => {
+    return Response.ok([
+      { shoeSize: 10, petName: 'John' },
+      { shoeSize: 9, petName: 'Milly' },
+    ])
+  })
+
 // The route type is not explicitly declared
 const noExplicitRouteType = route
   .get('/no-explicit-route-type')
@@ -132,6 +141,7 @@ export default router(
   directRouteCall,
   requestBody,
   interfaceResponse,
+  interfaceArrayResponse,
   noExplicitRouteType,
   unusedRequest,
   query,

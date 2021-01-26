@@ -15,6 +15,7 @@ import {
   isBooleanLiteralType,
   isNumberLiteralType,
   isStringLiteralType,
+  isArrayType,
 } from './utils'
 
 interface GenerateOptions {
@@ -472,6 +473,18 @@ const typeToSchema = (
       // sole type.
       type = elems[0]
     }
+  }
+
+  if (isArrayType(type)) {
+    const elemType = type.getNumberIndexType()
+    if (!elemType) {
+      ctx.log('warn', 'Could not get array element type')
+      return
+    }
+    const elemSchema = typeToSchema(ctx, elemType)
+    if (!elemSchema) return
+
+    return { type: 'array', items: elemSchema, ...nullable }
   }
 
   if (

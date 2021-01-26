@@ -91,6 +91,38 @@ Array [
           },
         },
       },
+      "/interface-array-response": Object {
+        "get": Object {
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "items": Object {
+                      "properties": Object {
+                        "petName": Object {
+                          "nullable": true,
+                          "type": "string",
+                        },
+                        "shoeSize": Object {
+                          "type": "number",
+                        },
+                      },
+                      "required": Array [
+                        "shoeSize",
+                        "petName",
+                      ],
+                      "type": "object",
+                    },
+                    "type": "array",
+                  },
+                },
+              },
+              "description": "200",
+            },
+          },
+        },
+      },
       "/interface-response": Object {
         "get": Object {
           "responses": Object {
