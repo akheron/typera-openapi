@@ -25,6 +25,13 @@ const parseArgs = () =>
       description: 'Apply prettier to output TypeScript files',
       type: 'boolean',
       default: false,
+    })
+    .option('check', {
+      alias: 'c',
+      description:
+        'Exit with an error if output files are not up-to-date (useful for CI)',
+      type: 'boolean',
+      default: false,
     }).argv
 
 const outputFileName = (sourceFileName: string, ext: string): string =>
@@ -43,14 +50,36 @@ const main = async () => {
     })
   )
 
+  let success = true
   for (const { outputFileName, paths } of results) {
     let content = args.format === 'ts' ? tsString(paths) : jsonString(paths)
     if (args.prettify) {
       content = await runPrettier(outputFileName, content)
     }
-    console.log('Writing', outputFileName)
-    fs.writeFileSync(outputFileName, content)
+    if (args.check) {
+      if (!checkOutput(outputFileName, content)) success = false
+    } else {
+      writeOutput(outputFileName, content)
+    }
   }
+
+  if (!success) {
+    process.exit(1)
+  }
+}
+
+const checkOutput = (fileName: string, content: string): boolean => {
+  const current = fs.readFileSync(fileName, 'utf-8')
+  if (current !== content) {
+    console.log(`${fileName} is out of date`)
+    return false
+  }
+  return true
+}
+
+const writeOutput = (fileName: string, content: string): void => {
+  console.log('Writing', fileName)
+  fs.writeFileSync(fileName, content)
 }
 
 const tsString = (paths: OpenAPIV3.PathsObject): string => `\
