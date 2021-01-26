@@ -5,6 +5,8 @@ import { IntFromString, NumberFromString } from 'io-ts-types'
 /**
  * No input, static output
  *
+ * @tags Patients
+ *
  * @summary This is a summary
  *
  * @response 200 Successful result
