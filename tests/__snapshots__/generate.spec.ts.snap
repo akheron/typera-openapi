@@ -74,6 +74,9 @@ Array [
             },
           },
           "summary": "This is a summary",
+          "tags": Array [
+            "Patients",
+          ],
         },
       },
       "/direct-route-call": Object {
