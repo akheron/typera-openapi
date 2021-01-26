@@ -105,6 +105,7 @@ const getRouteDeclaration = (
   symbol: ts.Symbol
 ): [string, OpenAPIV3.PathItemObject] | undefined => {
   const description = getRouteDescription(ctx, symbol)
+  const summary = getRouteSummary(ctx, symbol)
   const routeInput = getRouteInput(ctx, symbol)
   if (!routeInput) return
   const { method, path, requestNode, body, query, routeParams } = routeInput
@@ -128,6 +129,7 @@ const getRouteDeclaration = (
     pathTemplate,
     {
       [method]: {
+        ...(summary ? { summary } : undefined),
         ...(description ? { description } : undefined),
         ...(parameters.length > 0 ? { parameters } : undefined),
         ...operationRequestBody(requestBody),
@@ -142,6 +144,13 @@ const getRouteDescription = (ctx: Context, symbol: ts.Symbol) =>
     .getDocumentationComment(ctx.checker)
     .map((part) => part.text)
     .join('')
+
+const getRouteSummary = (ctx: Context, symbol: ts.Symbol): string | undefined =>
+  symbol
+    .getJsDocTags()
+    .filter((tag) => tag.name === 'summary')
+    .map((tag) => tag.text)
+    .filter(isDefined)[0]
 
 const operationRequestBody = (
   contentSchema: OpenAPIV3.SchemaObject | undefined
