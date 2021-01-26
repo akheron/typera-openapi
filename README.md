@@ -91,5 +91,16 @@ The `prefix` function is used to move OpenAPI path definitions to a different
 prefix, because the `foo` and `bar` routes are served from their respecive
 prefixes.
 
+## Releasing
+
+```
+$ yarn version --new-version <major|minor|patch>
+$ yarn publish
+$ git push origin main --tags
+```
+
+Open https://github.com/akheron/typera-openapi/releases, edit the draft release,
+select the newest version tag, adjust the description as needed.
+
 [openapi v3]: https://swagger.io/specification/
 [typera]: https://github.com/akheron/typera
