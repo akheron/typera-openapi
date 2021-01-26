@@ -158,10 +158,7 @@ const getRouteTags = (ctx: Context, symbol: ts.Symbol): string[] | undefined =>
   symbol
     .getJsDocTags()
     .filter((tag) => tag.name === 'tags')
-    .map((tag) => {
-      console.log(tag.text)
-      return tag.text?.split(',')
-    })
+    .map((tag) => tag.text?.split(','))
     .filter(isDefined)[0]
 
 const operationRequestBody = (
