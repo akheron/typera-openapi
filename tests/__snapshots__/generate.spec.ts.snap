@@ -73,6 +73,7 @@ Array [
               "description": "Successful result",
             },
           },
+          "summary": "This is a summary",
         },
       },
       "/direct-route-call": Object {
