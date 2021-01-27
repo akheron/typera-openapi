@@ -22,7 +22,7 @@ const parseArgs = () =>
     })
     .option('prettify', {
       alias: 'p',
-      description: 'Apply prettier to output TypeScript files',
+      description: 'Apply prettier to output files',
       type: 'boolean',
       default: false,
     })

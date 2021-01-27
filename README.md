@@ -91,6 +91,32 @@ The `prefix` function is used to move OpenAPI path definitions to a different
 prefix, because the `foo` and `bar` routes are served from their respecive
 prefixes.
 
+## CLI
+
+```
+typera-openapi [options] FILE...
+```
+
+Generate OpenAPI definitions for routes found in the given files.
+
+For each input file `file.ts`, writes a `file.openapi.ts` or
+`file.openapi.json`, depending on `--format`.
+
+Options:
+
+`--format`
+
+Output file format. Either `ts` or `json`. Default: `ts`.
+
+`--prettify`, `-p`
+
+Apply [prettier] formatting to output files.
+
+`--check`, `-c`
+
+Check that generated files are up-to-date without actually generating them. If
+any file is outdated, print an error and exit with status 1. Useful for CI.
+
 ## Releasing
 
 ```
@@ -104,3 +130,4 @@ select the newest version tag, adjust the description as needed.
 
 [openapi v3]: https://swagger.io/specification/
 [typera]: https://github.com/akheron/typera
+[prettier]: https://prettier.io
