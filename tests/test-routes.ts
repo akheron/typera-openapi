@@ -3,12 +3,10 @@ import * as t from 'io-ts'
 import { IntFromString, NumberFromString } from 'io-ts-types'
 
 /**
- * No input, static output
+ * No input, static output, has a tag
  *
  * @tags Tag
- *
  * @summary This is a summary
- *
  * @response 200 Successful result
  */
 const constant: Route<Response.Ok<string>> = route
@@ -46,8 +44,10 @@ const codec = t.intersection([
 ])
 
 /**
- * This one has request body and two possible successful responses
- *
+ * This one has request body and two possible successful responses and multiple tags
+ * @tags Tag1,Tag2
+ * @tags Tag3, Tag4
+ * @tags Tag5
  * @response 200 Successful result
  * @response 201 A new resource was created
  * @response 400 Validation error

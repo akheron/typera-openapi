@@ -159,7 +159,9 @@ const getRouteTags = (ctx: Context, symbol: ts.Symbol): string[] | undefined =>
     .getJsDocTags()
     .filter((tag) => tag.name === 'tags')
     .map((tag) => tag.text?.split(','))
-    .filter(isDefined)[0]
+    .filter(isDefined)
+    .flat()
+    .map((tag) => tag.trim())
 
 const operationRequestBody = (
   contentSchema: OpenAPIV3.SchemaObject | undefined

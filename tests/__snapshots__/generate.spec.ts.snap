@@ -60,7 +60,7 @@ Array [
       },
       "/constant": Object {
         "get": Object {
-          "description": "No input, static output",
+          "description": "No input, static output, has a tag",
           "responses": Object {
             "200": Object {
               "content": Object {
@@ -212,7 +212,7 @@ Array [
       },
       "/request-body": Object {
         "post": Object {
-          "description": "This one has request body and two possible successful responses",
+          "description": "This one has request body and two possible successful responses and multiple tags",
           "requestBody": Object {
             "content": Object {
               "application/json": Object {
@@ -310,6 +310,13 @@ Array [
               "description": "Validation error",
             },
           },
+          "tags": Array [
+            "Tag1",
+            "Tag2",
+            "Tag3",
+            "Tag4",
+            "Tag5",
+          ],
         },
       },
       "/response-headers": Object {
