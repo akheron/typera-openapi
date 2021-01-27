@@ -22,8 +22,8 @@ import { Route, route, router } from 'typera-express'
 /**
  * The JSDoc text is used as a description for the route (optional).
  *
+ * @tags Tag1,Tag2
  * @summary You can also set a short summary
- *
  * @response 200 Success response description.
  * @response 400 Another description for a response. This one
  * spans multile lines.
