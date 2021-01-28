@@ -1,4 +1,11 @@
-import { Parser, Response, Route, route, router } from 'typera-express'
+import {
+  applyMiddleware,
+  Parser,
+  Response,
+  Route,
+  route,
+  router,
+} from 'typera-express'
 import * as t from 'io-ts'
 import { IntFromString, NumberFromString } from 'io-ts-types'
 
@@ -140,6 +147,14 @@ const responseHeaders: Route<
   return Response.ok('yep', { 'X-Foo': 'foo', 'X-Bar': 'bar' })
 })
 
+// Custom route function
+const customRoute = () => applyMiddleware()
+const usesCustomRoute: Route<Response.Ok<string>> = customRoute()
+  .get('/uses-custom-route')
+  .handler(async () => {
+    return Response.ok('foo')
+  })
+
 export default router(
   constant,
   directRouteCall,
@@ -151,5 +166,6 @@ export default router(
   query,
   routeParams,
   brandedRequestBody,
-  responseHeaders
+  responseHeaders,
+  usesCustomRoute
 )

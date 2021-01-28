@@ -226,7 +226,7 @@ const getRouteInput = (
       method = methodArg.text
       path = pathArg.text
 
-      // Property access chain ends
+      // Done
       break
     } else if (ts.isPropertyAccessExpression(lhs)) {
       if (!ts.isIdentifier(lhs.name)) return
@@ -243,6 +243,9 @@ const getRouteInput = (
           return
         }
         path = pathArg.text
+
+        // Done
+        break
       } else if (fnName === 'handler') {
         const handlerFn = expr.arguments[0]
         if (
