@@ -105,8 +105,8 @@ const getRouteDeclaration = (
   symbol: ts.Symbol
 ): [string, OpenAPIV3.PathItemObject] | undefined => {
   const description = getRouteDescription(ctx, symbol)
-  const summary = getRouteSummary(ctx, symbol)
-  const tags = getRouteTags(ctx, symbol)
+  const summary = getRouteSummary(symbol)
+  const tags = getRouteTags(symbol)
   const routeInput = getRouteInput(ctx, symbol)
   if (!routeInput) return
   const { method, path, requestNode, body, query, routeParams } = routeInput
@@ -147,14 +147,14 @@ const getRouteDescription = (ctx: Context, symbol: ts.Symbol) =>
     .map((part) => part.text)
     .join('')
 
-const getRouteSummary = (ctx: Context, symbol: ts.Symbol): string | undefined =>
+const getRouteSummary = (symbol: ts.Symbol): string | undefined =>
   symbol
     .getJsDocTags()
     .filter((tag) => tag.name === 'summary')
     .map((tag) => tag.text)
     .filter(isDefined)[0]
 
-const getRouteTags = (ctx: Context, symbol: ts.Symbol): string[] | undefined =>
+const getRouteTags = (symbol: ts.Symbol): string[] | undefined =>
   symbol
     .getJsDocTags()
     .filter((tag) => tag.name === 'tags')
