@@ -390,6 +390,22 @@ Array [
           },
         },
       },
+      "/uses-custom-route": Object {
+        "get": Object {
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "text/plain": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "200",
+            },
+          },
+        },
+      },
     },
   },
 ]
