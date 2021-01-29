@@ -107,6 +107,75 @@ Apply [prettier] formatting to output files.
 Check that generated files are up-to-date without actually generating them. If
 any file is outdated, print an error and exit with status 1. Useful for CI.
 
+## How it works?
+
+`typera-openapi` uses TypeScript type information to generate OpenAPI
+definitions. Methods, paths, route params, query params, request and response
+bodies, and request and response headers are determined by looking up the type
+information provided by the TypeScript compiler API.
+
+For example, assume we have this route:
+
+```typescript
+/**
+ * @response 200 User created successfully
+ * @response 400 Validation error
+ */
+const createUser: Route<Response.Ok<User> | Response.BadRequest<string>> = route
+  .post('/users')
+  .use(Parser.body(createUserBody))
+  .handler(async (request) => { ... })
+```
+
+- Response descriptions are looked up from the JSDoc comment. Other tags are
+  also available.
+- Response body and header types are available in the type of the `createUser`
+  variable. The explicit type annotation would not even be needed, because the
+  compiler can infer the type.
+- The rest are looked up by inspecting the type of the `request` parameter of
+  the route handler function.
+
+This has one caveat: The `request` type must match the _input_ you expect your
+user to send. Assume the `createUserBody` codec is like this:
+
+```typescript
+const createUserBody = t.type({
+  name: t.string,
+  shoeSize: t.number,
+  allowMarketing: BooleanFromString, // from io-ts-types
+})
+```
+
+The `name` and `shoeSize` fields are fine, since both `t.string` and `t.number`
+map their input type to the same output type. But the `allowMarketing` field is
+problematic, since `BooleanFromString` takes a string as an input, but converts
+it to `boolean`.
+
+So the JSON input this route expect is:
+
+```typescript
+type Input = {
+  name: string
+  shoeSize: number
+  allowMarketing: string
+}
+```
+
+But the type of `request.body` that the compiler sees is:
+
+```typescript
+type Body = {
+  name: string
+  shoeSize: number
+  allowMarketing: boolean
+}
+```
+
+For this reason, you shouldn't use decoders that change the type of the input
+directly. If needed, you should instead add another step for converting the data
+from input to the format you expect. This can be achieved with a custom
+middleware, for example.
+
 ## Releasing
 
 ```
