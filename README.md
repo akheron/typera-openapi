@@ -1,9 +1,9 @@
-# typera-openapi - typera to OpenAPI generator
+# typera-openapi - OpenAPI generator for typera
 
 ![Build](https://github.com/akheron/typera-openapi/workflows/tests/badge.svg)
 
-`typera-openapi` is an experimental tool that creates [OpenAPI v3] definitions
-from a project that uses [typera] for routes.
+`typera-openapi` is an experimental tool that automatically creates [OpenAPI v3]
+definitions for projects that use [typera] for routes.
 
 ## Getting started
 
@@ -17,13 +17,16 @@ Your route files must have a single default export that exports a typera router.
 JSDoc comments serve as additional documentation:
 
 ```typescript
-import { Route, route, router } from 'typera-express'
+// src/my-routes.ts
+
+import { Response, Route, route, router } from 'typera-express'
 
 /**
  * The JSDoc text is used as a description for the route (optional).
  *
- * @tags Tag1,Tag2
  * @summary You can also set a short summary
+ * @tags Tag1, Tag2
+ *
  * @response 200 Success response description.
  * @response 400 Another description for a response. This one
  * spans multile lines.
@@ -36,34 +39,27 @@ const myRoute: Route<Response.Ok<string> | Response.BadRequest<string>> =
 export default router(myRoute, ...)
 ```
 
-In the OpenAPI v3 spec, the `description` field of a
-[Response Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#responseObject)
-is required, so `typera-openapi` prints a warning if a JSDoc tag for a response
-is not found.
-
 Run the `typera-openapi` tool giving paths to your route files as command line
-arguments. Assuming you have two route files in your project:
+arguments:
 
 ```sh
-npx typera-openapi src/routes/foo.ts src/routes/bar.ts
+npx typera-openapi src/my-routes.ts
 ```
 
-This creates `src/routes/foo.openapi.ts` and `src/routes/bar.openapi.ts` which
-contain the OpenAPI definitions.
+This creates `src/my-routes.openapi.ts` which contains the OpenAPI definitions.
 
 Use the definitions in your app to serve documentation:
 
 ```typescript
-// This is src/app.ts
+// src/app.ts
+
 import * as express from 'express'
 import { OpenAPIV3 } from 'openapi-types'
 import * as swaggerUi from 'swagger-ui-express'
 import { prefix } from 'typera-openapi'
 
-import foo from './routes/foo'
-import fooDefs from './routes/foo.openapi'
-import bar from './routes/bar'
-import barDefs from './routes/bar.openapi'
+import myRoutes from './my-routes'
+import myRouteDefs from './my-routes.openapi'
 
 const openapiDoc: OpenAPIV3.Document = {
   openapi: '3.0.0',
@@ -72,24 +68,18 @@ const openapiDoc: OpenAPIV3.Document = {
     version: '0.1.0',
   },
   paths: {
-    ...prefix('/foo', fooDefs.paths),
-    ...prefix('/bar', barDefs.paths),
+    ...prefix('/api', myRouteDefs.paths),
   },
 }
 
 const app = express()
-app.use('/foo', foo.handler())
-app.use('/bar', bar.handler())
+app.use('/api', myRoutes.handler())
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiDoc))
-
-app.listen(3000, () => {
-  console.log('Listening on 127.0.0.1:3000')
-})
+app.listen(3000)
 ```
 
 The `prefix` function is used to move OpenAPI path definitions to a different
-prefix, because the `foo` and `bar` routes are served from their respecive
-prefixes.
+prefix, because the `myRoutes` are served from the `/api` prefix.
 
 ## CLI
 
