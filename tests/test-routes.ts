@@ -7,7 +7,7 @@ import {
   router,
 } from 'typera-express'
 import * as t from 'io-ts'
-import { IntFromString, NumberFromString } from 'io-ts-types'
+import { DateFromISOString, IntFromString, NumberFromString } from 'io-ts-types'
 
 /**
  * No input, static output, has a tag
@@ -46,6 +46,7 @@ const codec = t.intersection([
     numLits: t.union([t.literal(42), t.literal(123)]),
     strLit: t.literal('foo'),
     strLits: t.union([t.literal('foo'), t.literal('bar')]),
+    date: DateFromISOString,
   }),
   t.partial({ optionalBool: t.boolean }),
 ])
@@ -76,20 +77,21 @@ const requestBody: Route<
 interface User {
   shoeSize: number
   petName: string | null
+  updated: Date
 }
 
 const interfaceResponse: Route<Response.Ok<User>> = route
   .get('/interface-response')
   .handler(async () => {
-    return Response.ok({ shoeSize: 10, petName: 'John' })
+    return Response.ok({ shoeSize: 10, petName: 'John', updated: new Date() })
   })
 
 const interfaceArrayResponse: Route<Response.Ok<User[]>> = route
   .get('/interface-array-response')
   .handler(async () => {
     return Response.ok([
-      { shoeSize: 10, petName: 'John' },
-      { shoeSize: 9, petName: 'Milly' },
+      { shoeSize: 10, petName: 'John', updated: new Date() },
+      { shoeSize: 9, petName: 'Milly', updated: new Date() },
     ])
   })
 

@@ -16,6 +16,7 @@ import {
   isNumberLiteralType,
   isStringLiteralType,
   isArrayType,
+  isDateType,
 } from './utils'
 
 interface GenerateOptions {
@@ -508,6 +509,12 @@ const typeToSchema = (
     if (!elemSchema) return
 
     return { type: 'array', items: elemSchema, ...nullable }
+  }
+
+  if (isDateType(type)) {
+    // TODO: dates are always represented as date-time strings. It should be
+    // possible to override this.
+    return { type: 'string', format: 'date-time', ...nullable }
   }
 
   if (

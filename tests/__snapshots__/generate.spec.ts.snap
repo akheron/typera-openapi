@@ -111,10 +111,15 @@ Array [
                         "shoeSize": Object {
                           "type": "number",
                         },
+                        "updated": Object {
+                          "format": "date-time",
+                          "type": "string",
+                        },
                       },
                       "required": Array [
                         "shoeSize",
                         "petName",
+                        "updated",
                       ],
                       "type": "object",
                     },
@@ -142,10 +147,15 @@ Array [
                       "shoeSize": Object {
                         "type": "number",
                       },
+                      "updated": Object {
+                        "format": "date-time",
+                        "type": "string",
+                      },
                     },
                     "required": Array [
                       "shoeSize",
                       "petName",
+                      "updated",
                     ],
                     "type": "object",
                   },
@@ -218,6 +228,10 @@ Array [
               "application/json": Object {
                 "schema": Object {
                   "properties": Object {
+                    "date": Object {
+                      "format": "date-time",
+                      "type": "string",
+                    },
                     "nullableNum": Object {
                       "nullable": true,
                       "type": "number",
@@ -279,6 +293,7 @@ Array [
                     "numLits",
                     "strLit",
                     "strLits",
+                    "date",
                   ],
                   "type": "object",
                 },
