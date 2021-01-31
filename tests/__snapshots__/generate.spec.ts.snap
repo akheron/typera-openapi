@@ -358,6 +358,31 @@ Array [
           },
         },
       },
+      "/schema-docstrings": Object {
+        "get": Object {
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "properties": Object {
+                      "field": Object {
+                        "description": "Field documentation here",
+                        "type": "number",
+                      },
+                    },
+                    "required": Array [
+                      "field",
+                    ],
+                    "type": "object",
+                  },
+                },
+              },
+              "description": "200",
+            },
+          },
+        },
+      },
       "/unused-request": Object {
         "get": Object {
           "responses": Object {

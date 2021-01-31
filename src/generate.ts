@@ -105,7 +105,7 @@ const getRouteDeclaration = (
   ctx: Context,
   symbol: ts.Symbol
 ): [string, OpenAPIV3.PathItemObject] | undefined => {
-  const description = getRouteDescription(ctx, symbol)
+  const description = getDescriptionFromComment(ctx, symbol)
   const summary = getRouteSummary(symbol)
   const tags = getRouteTags(symbol)
   const routeInput = getRouteInput(ctx, symbol)
@@ -142,7 +142,7 @@ const getRouteDeclaration = (
   ]
 }
 
-const getRouteDescription = (ctx: Context, symbol: ts.Symbol) =>
+const getDescriptionFromComment = (ctx: Context, symbol: ts.Symbol) =>
   symbol
     .getDocumentationComment(ctx.checker)
     .map((part) => part.text)
@@ -449,48 +449,61 @@ const typeToHeaders = (ctx: Context, type: ts.Type): Headers => {
   return result
 }
 
+interface BaseSchema {
+  description?: string
+  nullable?: boolean
+}
+
+const getBaseSchema = (
+  ctx: Context,
+  symbol: ts.Symbol | undefined
+): BaseSchema => {
+  const description = symbol ? getDescriptionFromComment(ctx, symbol) : ''
+  return { ...(description ? { description } : undefined) }
+}
+
 const typeToSchema = (
   ctx: Context,
   type: ts.Type,
-  optional = false
+  options: { symbol?: ts.Symbol; optional?: boolean } = {}
 ): OpenAPIV3.SchemaObject | undefined => {
-  let nullable: { nullable: true } | undefined
+  let base = getBaseSchema(ctx, options.symbol)
 
   if (type.isUnion()) {
     let elems = type.types
 
-    if (optional) {
+    if (options.optional) {
       elems = type.types.filter((elem) => !isUndefinedType(elem))
     }
 
     if (elems.some(isNullType)) {
       // One of the union elements is null
-      nullable = { nullable: true }
+      base = { ...base, nullable: true }
       elems = elems.filter((elem) => !isNullType(elem))
     }
 
     if (elems.every(isBooleanLiteralType)) {
       // All elements are boolean literals => boolean
-      return { type: 'boolean', ...nullable }
+      return { type: 'boolean', ...base }
     } else if (elems.every(isNumberLiteralType)) {
       // All elements are number literals => enum
       return {
         type: 'number',
         enum: elems.map((elem) => elem.value),
-        ...nullable,
+        ...base,
       }
     } else if (elems.every(isStringLiteralType)) {
       // All elements are string literals => enum
       return {
         type: 'string',
         enum: elems.map((elem) => elem.value),
-        ...nullable,
+        ...base,
       }
     } else if (elems.length >= 2) {
       // 2 or more types remain => anyOf
       return {
         anyOf: elems.map((elem) => typeToSchema(ctx, elem)).filter(isDefined),
-        ...nullable,
+        ...base,
       }
     } else {
       // Only one element left in the union. Fall through and consider it as the
@@ -508,13 +521,13 @@ const typeToSchema = (
     const elemSchema = typeToSchema(ctx, elemType)
     if (!elemSchema) return
 
-    return { type: 'array', items: elemSchema, ...nullable }
+    return { type: 'array', items: elemSchema, ...base }
   }
 
   if (isDateType(type)) {
     // TODO: dates are always represented as date-time strings. It should be
     // possible to override this.
-    return { type: 'string', format: 'date-time', ...nullable }
+    return { type: 'string', format: 'date-time', ...base }
   }
 
   if (
@@ -527,7 +540,7 @@ const typeToSchema = (
       required: props
         .filter((prop) => !isOptional(prop))
         .map((prop) => prop.name),
-      ...nullable,
+      ...base,
       properties: Object.fromEntries(
         props
           .map((prop) => {
@@ -539,7 +552,10 @@ const typeToSchema = (
               ctx.log('warn', 'Could not get type for property', prop.name)
               return
             }
-            const propSchema = typeToSchema(ctx, propType, isOptional(prop))
+            const propSchema = typeToSchema(ctx, propType, {
+              symbol: prop,
+              optional: isOptional(prop),
+            })
             if (!propSchema) {
               ctx.log('warn', 'Could not get schema for property', prop.name)
               return
@@ -552,25 +568,25 @@ const typeToSchema = (
   }
 
   if (isStringType(type)) {
-    return { type: 'string', ...nullable }
+    return { type: 'string', ...base }
   }
   if (isNumberType(type)) {
-    return { type: 'number', ...nullable }
+    return { type: 'number', ...base }
   }
   if (isBooleanType(type)) {
-    return { type: 'boolean', ...nullable }
+    return { type: 'boolean', ...base }
   }
   if (isStringLiteralType(type)) {
-    return { type: 'string', enum: [type.value], ...nullable }
+    return { type: 'string', enum: [type.value], ...base }
   }
   if (isNumberLiteralType(type)) {
-    return { type: 'number', enum: [type.value], ...nullable }
+    return { type: 'number', enum: [type.value], ...base }
   }
 
   const typeStr = ctx.checker.typeToString(type)
   if (typeStr === 'Branded<number, IntBrand>') {
     // io-ts int
-    return { type: 'integer', ...nullable }
+    return { type: 'integer', ...base }
   }
 
   ctx.log('warn', `Ignoring an unknown type: ${typeStr}`)
