@@ -132,6 +132,7 @@ const createUser: Route<Response.Ok<User> | Response.BadRequest<string>> = route
 - Response body and header types are available in the type of the `createUser`
   variable. The explicit type annotation would not even be needed, because the
   compiler can infer the type.
+- Method and path are available in the `.post('/users')` call.
 - The rest are looked up by inspecting the type of the `request` parameter of
   the route handler function.
 
@@ -175,6 +176,14 @@ For this reason, you shouldn't use decoders that change the type of the input
 directly. If needed, you should instead add another step for converting the data
 from input to the format you expect. This can be achieved with a custom
 middleware, for example.
+
+### The `Date` type
+
+JSON doesn't have a native `Date` type. As explained above, when
+`typera-openapi` encounters a `Date` type, it doesn't know from which input type
+it is parsed, so it uses `string` and sets `format` to `date-time`, because this
+is how `JSON.stringify` encodes `Date` objects by default. In the future we may
+add a way to override this behavior.
 
 ## Releasing
 

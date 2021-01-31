@@ -28,6 +28,25 @@ export const isUndefinedType = (type: ts.Type): boolean =>
 export const isNullType = (type: ts.Type): boolean =>
   !!(type.flags & ts.TypeFlags.Null)
 
+// A random subset of date methods
+const dateMethods = [
+  'getTime',
+  'getFullYear',
+  'getDate',
+  'setMilliseconds',
+  'setHours',
+  'setFullYear',
+]
+export const isDateType = (type: ts.Type): boolean => {
+  const symbol = type.symbol
+  return (
+    isObjectType(type) &&
+    symbol.escapedName === 'Date' &&
+    // If it walks like a duck and it quacks like a duck, then it must be a duck
+    dateMethods.every((name) => symbol.members?.get(name as ts.__String))
+  )
+}
+
 export const getPropertyType = (
   checker: ts.TypeChecker,
   location: ts.Node,
