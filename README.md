@@ -31,8 +31,13 @@ import { Response, Route, route, router } from 'typera-express'
  * @response 400 Another description for a response. This one
  * spans multile lines.
  */
-const myRoute: Route<Response.Ok<string> | Response.BadRequest<string>> =
+const myRoute: Route<Response.Ok<MyResult> | Response.BadRequest<string>> =
   route.get(...).handler(...)
+
+interface MyResult {
+  /** Object properties can have descriptions, too */
+  field: number
+}
 
 // ...
 

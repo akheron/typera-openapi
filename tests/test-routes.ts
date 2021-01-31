@@ -157,6 +157,18 @@ const usesCustomRoute: Route<Response.Ok<string>> = customRoute()
     return Response.ok('foo')
   })
 
+// Docstrings in input/output schemas
+interface DocumentedInterface {
+  /** Field documentation here */
+  field: number
+}
+
+const schemaDocstrings: Route<Response.Ok<DocumentedInterface>> = route
+  .get('/schema-docstrings')
+  .handler(async () => {
+    return Response.ok({ field: 42 })
+  })
+
 export default router(
   constant,
   directRouteCall,
@@ -169,5 +181,6 @@ export default router(
   routeParams,
   brandedRequestBody,
   responseHeaders,
-  usesCustomRoute
+  usesCustomRoute,
+  schemaDocstrings
 )
