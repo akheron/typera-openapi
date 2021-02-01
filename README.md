@@ -22,7 +22,7 @@ JSDoc comments serve as additional documentation:
 import { Response, Route, route, router } from 'typera-express'
 
 interface MyResult {
-  /** The JSDoc text is used as a description for object fields */
+  /** The JSDoc text is used as a description for object properties */
   field: number
 }
 
@@ -162,7 +162,7 @@ map their input type to the same output type. But the `allowMarketing` field is
 problematic, since `BooleanFromString` takes a string as an input, but converts
 it to `boolean`.
 
-So the JSON input this route expect is:
+So the JSON input this route expects is:
 
 ```typescript
 type Input = {
