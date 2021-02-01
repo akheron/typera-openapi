@@ -21,8 +21,18 @@ JSDoc comments serve as additional documentation:
 
 import { Response, Route, route, router } from 'typera-express'
 
+interface MyResult {
+  /** The JSDoc text is used as a description for object fields */
+  field: number
+}
+
+const bodyCodec = t.type({
+  /** Descriptions are also supported in io-ts codecs */
+  name: t.string
+})
+
 /**
- * The JSDoc text is used as a description for the route (optional).
+ * Routes can also have a description. Note that descriptions are entirely optional.
  *
  * @summary You can also set a short summary
  * @tags Tag1, Tag2
@@ -32,12 +42,7 @@ import { Response, Route, route, router } from 'typera-express'
  * spans multile lines.
  */
 const myRoute: Route<Response.Ok<MyResult> | Response.BadRequest<string>> =
-  route.get(...).handler(...)
-
-interface MyResult {
-  /** Object properties can have descriptions, too */
-  field: number
-}
+  route.post(...).use(Parser.body(bodyCodec)).handler(...)
 
 // ...
 

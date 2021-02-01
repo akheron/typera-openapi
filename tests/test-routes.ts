@@ -158,15 +158,23 @@ const usesCustomRoute: Route<Response.Ok<string>> = customRoute()
   })
 
 // Docstrings in input/output schemas
+const documentedCodec = t.type({
+  /** Input field description */
+  inputField: t.number,
+})
+
 interface DocumentedInterface {
-  /** Field documentation here */
-  field: number
+  /** OUtput field description here */
+  outputField: string
 }
 
-const schemaDocstrings: Route<Response.Ok<DocumentedInterface>> = route
+const schemaDocstrings: Route<
+  Response.Ok<DocumentedInterface> | Response.BadRequest<string>
+> = route
   .get('/schema-docstrings')
-  .handler(async () => {
-    return Response.ok({ field: 42 })
+  .use(Parser.body(documentedCodec))
+  .handler(async (request) => {
+    return Response.ok({ outputField: request.body.inputField + '' })
   })
 
 export default router(
