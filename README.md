@@ -2,8 +2,8 @@
 
 ![Build](https://github.com/akheron/typera-openapi/workflows/tests/badge.svg)
 
-`typera-openapi` is an tool that automatically creates [OpenAPI v3]
-definitions for projects that use [typera] for routes.
+`typera-openapi` is an tool that automatically creates [OpenAPI v3] definitions
+for projects that use [typera] for routes.
 
 ## Getting started
 
