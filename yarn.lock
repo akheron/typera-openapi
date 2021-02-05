@@ -4319,23 +4319,23 @@ typedarray-to-buffer@^3.1.5:
   dependencies:
     is-typedarray "^1.0.0"
 
-typera-common@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/typera-common/-/typera-common-2.0.0.tgz#d449df2415d2e6758e42d71cb34948199c2eca93"
-  integrity sha512-vGRfNDJK5afcl3xbKA03K03JAJ/Rqp53BWsJV0k9yuwzfLdtlX5c5EU8wpM8qYQLwRwhye+DnbfEHIgW1x/lxw==
+typera-common@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/typera-common/-/typera-common-2.1.0.tgz#d914b45a495b050e0c714960a10e5185c6e53f1e"
+  integrity sha512-hv9JrlIgTfbO0S3gMKgVpYEtolcvAMmVaxT6CSlrL2GU2AF+R/EI8RO36bqB7qjQtDg60k8pMOPgZavhpk0pyQ==
   dependencies:
     fp-ts ">=2.0.0"
     io-ts ">=2.0.0"
     io-ts-types ">=0.5.1"
 
-typera-express@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/typera-express/-/typera-express-2.0.0.tgz#ec2881beaa66200dfee59dabda2653572ba47b8b"
-  integrity sha512-qCwSwL4AbLRndo3yDZweLnqXZE2miaQJgMS289wzGBsA1WCzERjyYzEUcjlIMCfbe1Uj7QUdBBBHqR5JLyf1Kw==
+typera-express@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/typera-express/-/typera-express-2.1.0.tgz#ae273c212651f96f1b07bebe6fc567150c8a12f1"
+  integrity sha512-dg8Pf3t/kvRc+oyCTglokEsJcTRWi51DUpBBr/NukGIU5HnxegD1HgZHKTIaH7cn4p+qQs+7GG5kU2AU7Z4u3w==
   dependencies:
     "@types/express" ">=4.0.0"
     express ">=4.0.0"
-    typera-common "^2.0.0"
+    typera-common "^2.1.0"
 
 typescript@^4.1.3:
   version "4.1.3"

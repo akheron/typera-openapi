@@ -130,6 +130,20 @@ const routeParams: Route<Response.Ok<{ id: number }>> = route
     return Response.ok({ id: request.routeParams.id })
   })
 
+// Cookies
+const cookiesCodec = t.intersection([
+  t.strict({ foo: t.string }),
+  t.partial({ bar: NumberFromString }),
+])
+const cookies: Route<
+  Response.Ok<{ foo: string; bar?: number }> | Response.BadRequest<string>
+> = route
+  .get('/cookies')
+  .use(Parser.cookies(cookiesCodec))
+  .handler(async (request) => {
+    return Response.ok(request.cookies)
+  })
+
 // Request body has a branded type
 const brandedCodec = t.type({ param: IntFromString })
 
@@ -187,6 +201,7 @@ export default router(
   unusedRequest,
   query,
   routeParams,
+  cookies,
   brandedRequestBody,
   responseHeaders,
   usesCustomRoute,
