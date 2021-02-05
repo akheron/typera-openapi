@@ -110,7 +110,15 @@ const getRouteDeclaration = (
   const tags = getRouteTags(symbol)
   const routeInput = getRouteInput(ctx, symbol)
   if (!routeInput) return
-  const { method, path, requestNode, body, query, routeParams } = routeInput
+  const {
+    method,
+    path,
+    requestNode,
+    body,
+    query,
+    routeParams,
+    cookies,
+  } = routeInput
 
   const responses = getResponseTypes(ctx, symbol)
   if (!responses) return
@@ -123,6 +131,7 @@ const getRouteDeclaration = (
   const parameters = [
     ...typeToParameters(ctx, 'path', routeParams),
     ...typeToParameters(ctx, 'query', query),
+    ...typeToParameters(ctx, 'cookie', cookies),
   ]
 
   const pathTemplate = path.replace(/:([^-.()/]+)\(.*?\)/g, '{$1}')
@@ -191,6 +200,7 @@ interface RouteInput {
   body: ts.Type | undefined
   query: ts.Type | undefined
   routeParams: ts.Type | undefined
+  cookies: ts.Type | undefined
 }
 
 const getRouteInput = (
@@ -208,7 +218,8 @@ const getRouteInput = (
     requestNode: ts.Node | undefined,
     body: ts.Type | undefined,
     query: ts.Type | undefined,
-    routeParams: ts.Type | undefined
+    routeParams: ts.Type | undefined,
+    cookies: ts.Type | undefined
 
   while (ts.isCallExpression(expr)) {
     const lhs: ts.LeftHandSideExpression = expr.expression
@@ -263,6 +274,7 @@ const getRouteInput = (
           body = getPropertyType(ctx.checker, req, type, 'body')
           query = getPropertyType(ctx.checker, req, type, 'query')
           routeParams = getPropertyType(ctx.checker, req, type, 'routeParams')
+          cookies = getPropertyType(ctx.checker, req, type, 'cookies')
           requestNode = req
         }
       }
@@ -283,7 +295,7 @@ const getRouteInput = (
     ctx.log('warn', "The 'all' method is not supported, skipping route")
     return
   }
-  return { method, path, requestNode, body, query, routeParams }
+  return { method, path, requestNode, body, query, routeParams, cookies }
 }
 
 const getResponseTypes = (

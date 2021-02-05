@@ -79,6 +79,55 @@ Array [
           ],
         },
       },
+      "/cookies": Object {
+        "get": Object {
+          "parameters": Array [
+            Object {
+              "in": "cookie",
+              "name": "foo",
+              "required": true,
+            },
+            Object {
+              "in": "cookie",
+              "name": "bar",
+              "required": false,
+            },
+          ],
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "properties": Object {
+                      "bar": Object {
+                        "type": "number",
+                      },
+                      "foo": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "foo",
+                    ],
+                    "type": "object",
+                  },
+                },
+              },
+              "description": "200",
+            },
+            "400": Object {
+              "content": Object {
+                "text/plain": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "400",
+            },
+          },
+        },
+      },
       "/direct-route-call": Object {
         "get": Object {
           "responses": Object {
