@@ -191,6 +191,11 @@ const schemaDocstrings: Route<
     return Response.ok({ outputField: request.body.inputField + '' })
   })
 
+// Binary response body
+const binaryResponse: Route<Response.Ok<Buffer>> = route
+  .get('/binary-response')
+  .handler(async () => Response.ok(Buffer.from('hello', 'utf-8')))
+
 export default router(
   constant,
   directRouteCall,
@@ -205,5 +210,6 @@ export default router(
   brandedRequestBody,
   responseHeaders,
   usesCustomRoute,
-  schemaDocstrings
+  schemaDocstrings,
+  binaryResponse
 )

@@ -17,6 +17,7 @@ import {
   isStringLiteralType,
   isArrayType,
   isDateType,
+  isBufferType,
 } from './utils'
 
 interface GenerateOptions {
@@ -415,11 +416,9 @@ const getResponseDefinition = (
             content:
               isStringType(bodyType) || isNumberType(bodyType)
                 ? { 'text/plain': { schema: bodySchema } }
-                : {
-                    'application/json': {
-                      schema: bodySchema,
-                    },
-                  },
+                : isBufferType(bodyType)
+                ? { 'application/octet-stream': { schema: bodySchema } }
+                : { 'application/json': { schema: bodySchema } },
           }
         : undefined),
       ...(headers
@@ -540,6 +539,10 @@ const typeToSchema = (
     // TODO: dates are always represented as date-time strings. It should be
     // possible to override this.
     return { type: 'string', format: 'date-time', ...base }
+  }
+
+  if (isBufferType(type)) {
+    return { type: 'string', format: 'binary', ...base }
   }
 
   if (

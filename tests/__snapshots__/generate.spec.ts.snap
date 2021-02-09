@@ -15,6 +15,23 @@ Array [
   Object {
     "fileName": "tests/test-routes.ts",
     "paths": Object {
+      "/binary-response": Object {
+        "get": Object {
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/octet-stream": Object {
+                  "schema": Object {
+                    "format": "binary",
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "200",
+            },
+          },
+        },
+      },
       "/branded-request-body": Object {
         "post": Object {
           "requestBody": Object {
