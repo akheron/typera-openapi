@@ -1,5 +1,6 @@
 import * as ts from 'typescript'
 import { OpenAPIV3 } from 'openapi-types'
+import * as statuses from 'statuses'
 import { Context, Logger, context, withLocation } from './context'
 import {
   isDefined,
@@ -361,7 +362,7 @@ const getResponseDescriptions = (
 
 const getResponseDefinition = (
   ctx: Context,
-  descriptions: Partial<Record<string, string>>,
+  responseDescriptions: Partial<Record<string, string>>,
   responseType: ts.Type
 ): { status: string; response: OpenAPIV3.ResponseObject } | undefined => {
   const statusSymbol = responseType.getProperty('status')
@@ -383,11 +384,12 @@ const getResponseDefinition = (
   )
   if (!statusType || !bodyType || !headersType) return
 
-  if (!(statusType.flags & ts.TypeFlags.NumberLiteral)) {
+  const status = ctx.checker.typeToString(statusType)
+
+  if (!isNumberLiteralType(statusType)) {
+    ctx.log('warn', `Status code is not a number literal: ${status}`)
     return
   }
-
-  const status = ctx.checker.typeToString(statusType)
 
   // TODO: If bodyType is an interface (or type alias?), generate a schema
   // component object and a reference to it?
@@ -401,10 +403,13 @@ const getResponseDefinition = (
     ? typeToHeaders(ctx, headersType)
     : undefined
 
-  let description = descriptions[status]
+  let description = responseDescriptions[status]
   if (!description) {
-    ctx.log('warn', `No description for response ${status}`)
-    description = status
+    description = statuses.message[parseInt(status)]
+    if (!description) {
+      ctx.log('warn', `No description for response ${status}`)
+      description = status
+    }
   }
 
   return {
