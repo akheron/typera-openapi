@@ -5,6 +5,19 @@
 `typera-openapi` is an tool that automatically creates [OpenAPI v3] definitions
 for projects that use [typera] for routes.
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+## Table of Contents
+
+- [Getting started](#getting-started)
+- [CLI](#cli)
+- [How it works?](#how-it-works)
+  - [The `Date` type](#the-date-type)
+- [Releasing](#releasing)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Getting started
 
 Install typera-openapi:

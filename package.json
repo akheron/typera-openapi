@@ -18,6 +18,7 @@
     "lint": "eslint --max-warnings 0 '**/*.ts' && prettier --check \"**/*.{json,md}\"",
     "lint:fix": "eslint --fix '**/*.ts' && prettier --write '**/*.{json,md}'",
     "test": "jest",
+    "doctoc": "doctoc README.md --title '## Table of Contents' && prettier --write README.md",
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
@@ -32,6 +33,7 @@
     "@types/statuses": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^4.12.0",
     "@typescript-eslint/parser": "^4.12.0",
+    "doctoc": "^2.0.0",
     "eslint": "^7.17.0",
     "eslint-config-prettier": "^7.1.0",
     "eslint-plugin-prettier": "^3.3.1",
