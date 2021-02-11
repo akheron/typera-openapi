@@ -1,6 +1,6 @@
 {
   "name": "typera-openapi",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Generate OpenAPI spec from typera routes",
   "repository": "https://github.com/akheron/typera-openapi",
   "author": "Petri Lehtinen <petri@digip.org>",
