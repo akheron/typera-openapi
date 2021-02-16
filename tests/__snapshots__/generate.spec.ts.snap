@@ -424,6 +424,52 @@ Array [
           },
         },
       },
+      "/same-path-route": Object {
+        "get": Object {
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "properties": Object {
+                      "foo": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "foo",
+                    ],
+                    "type": "object",
+                  },
+                },
+              },
+              "description": "OK",
+            },
+          },
+        },
+        "post": Object {
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "properties": Object {
+                      "bar": Object {
+                        "type": "number",
+                      },
+                    },
+                    "required": Array [
+                      "bar",
+                    ],
+                    "type": "object",
+                  },
+                },
+              },
+              "description": "OK",
+            },
+          },
+        },
+      },
       "/schema-docstrings": Object {
         "get": Object {
           "requestBody": Object {

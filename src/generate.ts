@@ -74,8 +74,13 @@ const visit = (
         symbol
       )
       if (routeDeclaration) {
-        const [path, pathItem] = routeDeclaration
-        paths[path] = pathItem
+        const [path, method, operation] = routeDeclaration
+        const pathsItemObject = paths[path]
+        if (!pathsItemObject) {
+          paths[path] = { [method]: operation }
+        } else {
+          pathsItemObject[method] = operation
+        }
       }
     })
     return paths
@@ -106,7 +111,7 @@ const getRouterCallArgSymbols = (
 const getRouteDeclaration = (
   ctx: Context,
   symbol: ts.Symbol
-): [string, OpenAPIV3.PathItemObject] | undefined => {
+): [string, Method, OpenAPIV3.OperationObject] | undefined => {
   const description = getDescriptionFromComment(ctx, symbol)
   const summary = getRouteSummary(symbol)
   const tags = getRouteTags(symbol)
@@ -140,15 +145,14 @@ const getRouteDeclaration = (
 
   return [
     pathTemplate,
+    method,
     {
-      [method]: {
-        ...(summary ? { summary } : undefined),
-        ...(description ? { description } : undefined),
-        ...(tags && tags.length > 0 ? { tags } : undefined),
-        ...(parameters.length > 0 ? { parameters } : undefined),
-        ...operationRequestBody(requestBody),
-        responses,
-      },
+      ...(summary ? { summary } : undefined),
+      ...(description ? { description } : undefined),
+      ...(tags && tags.length > 0 ? { tags } : undefined),
+      ...(parameters.length > 0 ? { parameters } : undefined),
+      ...operationRequestBody(requestBody),
+      responses,
     },
   ]
 }
@@ -192,11 +196,15 @@ const methodNames = [
   'head',
   'options',
   'patch',
-  'all',
-]
+] as const
+
+type Method = Exclude<typeof methodNames[number], 'all'>
+
+const isMethod = (value: string): value is Method =>
+  methodNames.some((method) => value === method)
 
 interface RouteInput {
-  method: string
+  method: Method
   path: string
   requestNode: ts.Node | undefined
   body: ts.Type | undefined
@@ -215,7 +223,7 @@ const getRouteInput = (
   let expr = declaration.initializer
   if (!expr) return
 
-  let method: string | undefined,
+  let method: Method | undefined,
     path: string | undefined,
     requestNode: ts.Node | undefined,
     body: ts.Type | undefined,
@@ -237,6 +245,10 @@ const getRouteInput = (
         ctx.log('warn', 'method and path must be string literals')
         return
       }
+      if (!isMethod(methodArg.text)) {
+        ctx.log('warn', 'Unsupported method ${methodArg.text}')
+        return
+      }
       method = methodArg.text
       path = pathArg.text
 
@@ -245,7 +257,7 @@ const getRouteInput = (
     } else if (ts.isPropertyAccessExpression(lhs)) {
       if (!ts.isIdentifier(lhs.name)) return
       const fnName = lhs.name.escapedText.toString()
-      if (methodNames.includes(fnName)) {
+      if (isMethod(fnName)) {
         method = fnName
         const pathArg = expr.arguments[0]
         if (!pathArg) {
@@ -291,10 +303,6 @@ const getRouteInput = (
   }
   if (!path) {
     ctx.log('warn', 'Could not determine route path')
-    return
-  }
-  if (method === 'all') {
-    ctx.log('warn', "The 'all' method is not supported, skipping route")
     return
   }
   return { method, path, requestNode, body, query, routeParams, cookies }

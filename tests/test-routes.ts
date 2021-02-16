@@ -196,6 +196,15 @@ const binaryResponse: Route<Response.Ok<Buffer>> = route
   .get('/binary-response')
   .handler(async () => Response.ok(Buffer.from('hello', 'utf-8')))
 
+// Multiple methods in the same path
+const samePathRoute1: Route<Response.Ok<{ foo: string }>> = route
+  .get('/same-path-route')
+  .handler(async () => Response.ok({ foo: 'hello' }))
+
+const samePathRoute2: Route<Response.Ok<{ bar: number }>> = route
+  .post('/same-path-route')
+  .handler(async () => Response.ok({ bar: 42 }))
+
 export default router(
   constant,
   directRouteCall,
@@ -211,5 +220,7 @@ export default router(
   responseHeaders,
   usesCustomRoute,
   schemaDocstrings,
-  binaryResponse
+  binaryResponse,
+  samePathRoute1,
+  samePathRoute2
 )
