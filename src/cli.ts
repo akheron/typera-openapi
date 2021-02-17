@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 import * as fs from 'fs'
 import * as path from 'path'
+import { OpenAPIV3 } from 'openapi-types'
+import * as ts from 'typescript'
+import * as yargs from 'yargs'
+
 import { generate } from '.'
 import { Logger } from './context'
 import { runPrettier } from './prettify'
-import * as yargs from 'yargs'
-import { OpenAPIV3 } from 'openapi-types'
 
 const log: Logger = (location, level, ...args) =>
   console.log(`${location}: ${level}:`, ...args)
@@ -19,6 +21,10 @@ const parseArgs = () =>
       description: 'Output file format',
       choices: ['ts' as const, 'json' as const],
       default: 'ts' as Format,
+    })
+    .option('tsconfig', {
+      description: 'Which tsconfig.json to use',
+      default: 'tsconfig.json',
     })
     .option('prettify', {
       alias: 'p',
@@ -43,12 +49,15 @@ const main = async () => {
   const sourceFiles = args._.map((x) => x.toString())
   const ext = `.openapi.${args.format}`
 
-  const results = generate(sourceFiles, { strict: true }, { log }).map(
-    (result) => ({
-      ...result,
-      outputFileName: outputFileName(result.fileName, ext),
-    })
-  )
+  const compilerOptions = readCompilerOptions(args.tsconfig)
+  if (!compilerOptions) process.exit(1)
+
+  const results = generate(sourceFiles, compilerOptions, {
+    log,
+  }).map((result) => ({
+    ...result,
+    outputFileName: outputFileName(result.fileName, ext),
+  }))
 
   let success = true
   for (const { outputFileName, paths } of results) {
@@ -66,6 +75,22 @@ const main = async () => {
   if (!success) {
     process.exit(1)
   }
+}
+
+const readCompilerOptions = (
+  tsconfigPath: string
+): ts.CompilerOptions | undefined => {
+  const tsconfig = ts.readConfigFile(tsconfigPath, (path) =>
+    fs.readFileSync(path, 'utf-8')
+  )
+  if (tsconfig.error) {
+    console.error(
+      `Unable to read ${tsconfigPath}: ${tsconfig.error.messageText}`
+    )
+    console.error(`(Tip: Use --tsconfig to specify configuration file path)`)
+    return
+  }
+  return tsconfig.config.compilerOptions
 }
 
 const checkOutput = (fileName: string, content: string): boolean => {
