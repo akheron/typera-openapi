@@ -17,6 +17,11 @@ type Format = 'ts' | 'json'
 const parseArgs = () =>
   yargs
     .usage('Usage: $0 [options] FILE...')
+    .option('verbose', {
+      description: 'Verbose output',
+      type: 'boolean',
+      default: false,
+    })
     .option('format', {
       description: 'Output file format',
       choices: ['ts' as const, 'json' as const],
@@ -51,6 +56,10 @@ const main = async () => {
 
   const compilerOptions = readCompilerOptions(args.tsconfig)
   if (!compilerOptions) process.exit(1)
+
+  if (args.verbose) {
+    console.log(`Compiler options: ${JSON.stringify(compilerOptions, null, 2)}`)
+  }
 
   const results = generate(sourceFiles, compilerOptions, {
     log,
