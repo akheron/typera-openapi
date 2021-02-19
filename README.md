@@ -1,6 +1,6 @@
 # typera-openapi - OpenAPI generator for typera
 
-![Build](https://github.com/akheron/typera-openapi/workflows/tests/badge.svg)
+[![Build](https://github.com/akheron/typera-openapi/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/akheron/typera-openapi/actions/workflows/tests.yml)
 
 `typera-openapi` is an tool that automatically creates [OpenAPI v3] definitions
 for projects that use [typera] for routes.
