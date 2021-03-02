@@ -611,12 +611,20 @@ const typeToSchema = (
     return { type: 'number', enum: [type.value], ...base }
   }
 
-  const typeStr = ctx.checker.typeToString(type)
-  if (typeStr === 'Branded<number, IntBrand>') {
+  if (type.isIntersection()) {
     // io-ts int
-    return { type: 'integer', ...base }
+    const memberTypes = type.types.map((memberType) =>
+      ctx.checker.typeToString(memberType)
+    )
+    if (
+      memberTypes.length === 2 &&
+      memberTypes.includes('number') &&
+      memberTypes.includes('Brand<IntBrand>')
+    ) {
+      return { type: 'integer', ...base }
+    }
   }
 
-  ctx.log('warn', `Ignoring an unknown type: ${typeStr}`)
+  ctx.log('warn', `Ignoring an unknown type: ${ctx.checker.typeToString(type)}`)
   return
 }
