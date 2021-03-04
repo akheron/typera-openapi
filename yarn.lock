@@ -4592,10 +4592,10 @@ typera-common@^2.1.0:
     io-ts ">=2.0.0"
     io-ts-types ">=0.5.1"
 
-typera-express@2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/typera-express/-/typera-express-2.2.0.tgz#88a926c915d21a0a32a0252a01c8ee56c5355a64"
-  integrity sha512-nU7DcrjhQxs7aguYw+wNOdILZO3eGFNcFkXVJ9kt+zmO6G64JbQBv1u3cQYxB0ASugxRXAP3yGjIo8pwp483PA==
+typera-express@2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/typera-express/-/typera-express-2.2.1.tgz#104d0183b983f2216ad1ca616dde942ef2f44ccd"
+  integrity sha512-OFrzXM7oYz7V/KN7ozGJRO8yzDF2KPmjiiNzHnsEgRDUIVcWOur/Kl65k+SzUD46CyZiUXwaDHVgT1FY8kUVoQ==
   dependencies:
     "@types/express" ">=4.0.0"
     express ">=4.0.0"
