@@ -1,4 +1,5 @@
 import * as ts from 'typescript'
+import { Context } from './context'
 
 export const isDefined = <T>(value: T | undefined): value is T =>
   value !== undefined
@@ -79,4 +80,22 @@ export const isPackageSymbol = (
     ts.isSourceFile(parent) &&
     parent.fileName.includes(`/${packageName}/`)
   )
+}
+
+export const getBrandedType = (
+  ctx: Context,
+  type: ts.Type
+): { brandName: string; brandedType: ts.Type } | undefined => {
+  if (!type.isIntersection() || type.types.length !== 2) return undefined
+
+  const brandIndex = type.types.findIndex(
+    (t) => t.symbol?.escapedName === 'Brand'
+  )
+  if (brandIndex === -1) return undefined
+
+  const brand = type.types[brandIndex]
+  const brandName = ctx.checker.typeToString(brand)
+  const brandedType = type.types[brandIndex === 1 ? 0 : 1]
+
+  return { brandName, brandedType }
 }

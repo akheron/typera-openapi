@@ -39,12 +39,16 @@ Array [
               "application/json": Object {
                 "schema": Object {
                   "properties": Object {
-                    "param": Object {
+                    "int": Object {
                       "type": "integer",
+                    },
+                    "nonEmptyString": Object {
+                      "type": "string",
                     },
                   },
                   "required": Array [
-                    "param",
+                    "int",
+                    "nonEmptyString",
                   ],
                   "type": "object",
                 },
