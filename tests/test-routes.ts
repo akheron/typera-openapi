@@ -7,7 +7,12 @@ import {
   router,
 } from 'typera-express'
 import * as t from 'io-ts'
-import { DateFromISOString, IntFromString, NumberFromString } from 'io-ts-types'
+import {
+  DateFromISOString,
+  IntFromString,
+  NonEmptyString,
+  NumberFromString,
+} from 'io-ts-types'
 
 /**
  * No input, static output, has a tag
@@ -145,7 +150,10 @@ const cookies: Route<
   })
 
 // Request body has a branded type
-const brandedCodec = t.type({ param: IntFromString })
+const brandedCodec = t.type({
+  int: IntFromString,
+  nonEmptyString: NonEmptyString,
+})
 
 const brandedRequestBody: Route<
   Response.Ok<number> | Response.BadRequest<string>
@@ -153,7 +161,7 @@ const brandedRequestBody: Route<
   .post('/branded-request-body')
   .use(Parser.body(brandedCodec))
   .handler(async (request) => {
-    return Response.ok(request.body.param)
+    return Response.ok(request.body.int)
   })
 
 // Response headers

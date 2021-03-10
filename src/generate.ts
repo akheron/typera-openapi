@@ -19,6 +19,7 @@ import {
   isArrayType,
   isDateType,
   isBufferType,
+  getBrandedType,
 } from './utils'
 
 interface GenerateOptions {
@@ -611,18 +612,18 @@ const typeToSchema = (
     return { type: 'number', enum: [type.value], ...base }
   }
 
-  if (type.isIntersection()) {
-    // io-ts int
-    const memberTypes = type.types.map((memberType) =>
-      ctx.checker.typeToString(memberType)
-    )
-    if (
-      memberTypes.length === 2 &&
-      memberTypes.includes('number') &&
-      memberTypes.includes('Brand<IntBrand>')
-    ) {
+  const branded = getBrandedType(ctx, type)
+  if (branded) {
+    // io-ts branded type
+    const { brandName, brandedType } = branded
+
+    if (brandName === 'Brand<IntBrand>') {
+      // io-ts Int
       return { type: 'integer', ...base }
     }
+
+    // other branded type
+    return typeToSchema(ctx, brandedType, options)
   }
 
   ctx.log('warn', `Ignoring an unknown type: ${ctx.checker.typeToString(type)}`)
