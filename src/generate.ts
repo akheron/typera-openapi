@@ -142,7 +142,7 @@ const getRouteDeclaration = (
     ...typeToParameters(ctx, 'cookie', cookies),
   ]
 
-  const pathTemplate = path.replace(/:([^-.()/]+)\(.*?\)/g, '{$1}')
+  const pathTemplate = path.replace(/:([^-.()/]+)(\(.*?\))?/g, '{$1}')
 
   return [
     pathTemplate,

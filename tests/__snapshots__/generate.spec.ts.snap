@@ -543,12 +543,17 @@ Array [
           },
         },
       },
-      "/user/{id}": Object {
+      "/user/{id}/{other}": Object {
         "get": Object {
           "parameters": Array [
             Object {
               "in": "path",
               "name": "id",
+              "required": true,
+            },
+            Object {
+              "in": "path",
+              "name": "other",
               "required": true,
             },
           ],
@@ -561,9 +566,13 @@ Array [
                       "id": Object {
                         "type": "number",
                       },
+                      "other": Object {
+                        "type": "string",
+                      },
                     },
                     "required": Array [
                       "id",
+                      "other",
                     ],
                     "type": "object",
                   },
