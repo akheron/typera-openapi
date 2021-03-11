@@ -404,6 +404,44 @@ Array [
           ],
         },
       },
+      "/request-headers": Object {
+        "get": Object {
+          "parameters": Array [
+            Object {
+              "in": "header",
+              "name": "API-KEY",
+              "required": true,
+            },
+            Object {
+              "in": "header",
+              "name": "X-Forwarded-For",
+              "required": false,
+            },
+          ],
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "text/plain": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "OK",
+            },
+            "400": Object {
+              "content": Object {
+                "text/plain": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "Bad Request",
+            },
+          },
+        },
+      },
       "/response-headers": Object {
         "get": Object {
           "responses": Object {
