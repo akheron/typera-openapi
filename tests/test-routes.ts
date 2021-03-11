@@ -129,11 +129,14 @@ const query: Route<Response.Ok<string> | Response.BadRequest<string>> = route
   })
 
 // Route params
-const routeParams: Route<Response.Ok<{ id: number }>> = route
-  .get('/user/:id(int)')
-  .handler(async (request) => {
-    return Response.ok({ id: request.routeParams.id })
+const routeParams: Route<
+  Response.Ok<{ id: number; other: string }>
+> = route.get('/user/:id(int)/:other').handler(async (request) => {
+  return Response.ok({
+    id: request.routeParams.id,
+    other: request.routeParams.other,
   })
+})
 
 // Cookies
 const cookiesCodec = t.intersection([
