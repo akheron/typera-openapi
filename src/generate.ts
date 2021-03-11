@@ -124,6 +124,7 @@ const getRouteDeclaration = (
     requestNode,
     body,
     query,
+    headers,
     routeParams,
     cookies,
   } = routeInput
@@ -139,6 +140,7 @@ const getRouteDeclaration = (
   const parameters = [
     ...typeToParameters(ctx, 'path', routeParams),
     ...typeToParameters(ctx, 'query', query),
+    ...typeToParameters(ctx, 'header', headers),
     ...typeToParameters(ctx, 'cookie', cookies),
   ]
 
@@ -210,6 +212,7 @@ interface RouteInput {
   requestNode: ts.Node | undefined
   body: ts.Type | undefined
   query: ts.Type | undefined
+  headers: ts.Type | undefined
   routeParams: ts.Type | undefined
   cookies: ts.Type | undefined
 }
@@ -230,6 +233,7 @@ const getRouteInput = (
     body: ts.Type | undefined,
     query: ts.Type | undefined,
     routeParams: ts.Type | undefined,
+    headers: ts.Type | undefined,
     cookies: ts.Type | undefined
 
   while (ts.isCallExpression(expr)) {
@@ -288,6 +292,7 @@ const getRouteInput = (
           const type = ctx.checker.getTypeAtLocation(req)
           body = getPropertyType(ctx.checker, req, type, 'body')
           query = getPropertyType(ctx.checker, req, type, 'query')
+          headers = getPropertyType(ctx.checker, req, type, 'headers')
           routeParams = getPropertyType(ctx.checker, req, type, 'routeParams')
           cookies = getPropertyType(ctx.checker, req, type, 'cookies')
           requestNode = req
@@ -306,7 +311,16 @@ const getRouteInput = (
     ctx.log('warn', 'Could not determine route path')
     return
   }
-  return { method, path, requestNode, body, query, routeParams, cookies }
+  return {
+    method,
+    path,
+    requestNode,
+    body,
+    query,
+    headers,
+    routeParams,
+    cookies,
+  }
 }
 
 const getResponseTypes = (

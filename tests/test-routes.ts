@@ -110,8 +110,7 @@ const noExplicitRouteType = route
 // The handler's request parameter is unused
 const unusedRequest: Route<Response.Ok<string>> = route
   .get('/unused-request')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  .handler(async (request) => {
+  .handler(async (_request) => {
     return Response.ok('xyzzy')
   })
 
@@ -166,6 +165,21 @@ const brandedRequestBody: Route<
   .handler(async (request) => {
     return Response.ok(request.body.int)
   })
+
+// Request headers
+const requestHeaders: Route<
+  Response.Ok<string> | Response.BadRequest<string>
+> = route
+  .get('/request-headers')
+  .use(
+    Parser.headers(
+      t.intersection([
+        t.type({ 'API-KEY': t.string }),
+        t.partial({ 'X-Forwarded-For': t.string }),
+      ])
+    )
+  )
+  .handler(async (_request) => Response.ok('foo'))
 
 // Response headers
 const responseHeaders: Route<
@@ -228,6 +242,7 @@ export default router(
   routeParams,
   cookies,
   brandedRequestBody,
+  requestHeaders,
   responseHeaders,
   usesCustomRoute,
   schemaDocstrings,
