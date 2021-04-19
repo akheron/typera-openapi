@@ -89,6 +89,9 @@ const main = async () => {
 const readCompilerOptions = (
   tsconfigPath: string
 ): ts.CompilerOptions | undefined => {
+  const dirPath = path.dirname(tsconfigPath)
+  const fileName = path.basename(tsconfigPath)
+
   const tsconfig = ts.readConfigFile(tsconfigPath, (path) =>
     fs.readFileSync(path, 'utf-8')
   )
@@ -99,7 +102,21 @@ const readCompilerOptions = (
     console.error(`(Tip: Use --tsconfig to specify configuration file path)`)
     return
   }
-  return tsconfig.config.compilerOptions
+
+  const result = ts.convertCompilerOptionsFromJson(
+    tsconfig.config.compilerOptions,
+    dirPath,
+    fileName
+  )
+  if (result.errors.length) {
+    console.error(
+      `Invalid tsconfig ${tsconfigPath}:\n${result.errors
+        .map((err) => err.messageText)
+        .join('\n')}`
+    )
+    return
+  }
+  return result.options
 }
 
 const checkOutput = (fileName: string, content: string): boolean => {
