@@ -128,14 +128,14 @@ const query: Route<Response.Ok<string> | Response.BadRequest<string>> = route
   })
 
 // Route params
-const routeParams: Route<
-  Response.Ok<{ id: number; other: string }>
-> = route.get('/user/:id(int)/:other').handler(async (request) => {
-  return Response.ok({
-    id: request.routeParams.id,
-    other: request.routeParams.other,
+const routeParams: Route<Response.Ok<{ id: number; other: string }>> = route
+  .get('/user/:id(int)/:other')
+  .handler(async (request) => {
+    return Response.ok({
+      id: request.routeParams.id,
+      other: request.routeParams.other,
+    })
   })
-})
 
 // Cookies
 const cookiesCodec = t.intersection([
@@ -167,19 +167,18 @@ const brandedRequestBody: Route<
   })
 
 // Request headers
-const requestHeaders: Route<
-  Response.Ok<string> | Response.BadRequest<string>
-> = route
-  .get('/request-headers')
-  .use(
-    Parser.headers(
-      t.intersection([
-        t.type({ 'API-KEY': t.string }),
-        t.partial({ 'X-Forwarded-For': t.string }),
-      ])
+const requestHeaders: Route<Response.Ok<string> | Response.BadRequest<string>> =
+  route
+    .get('/request-headers')
+    .use(
+      Parser.headers(
+        t.intersection([
+          t.type({ 'API-KEY': t.string }),
+          t.partial({ 'X-Forwarded-For': t.string }),
+        ])
+      )
     )
-  )
-  .handler(async (_request) => Response.ok('foo'))
+    .handler(async (_request) => Response.ok('foo'))
 
 // Response headers
 const responseHeaders: Route<
