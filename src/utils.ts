@@ -30,17 +30,16 @@ export const isNullType = (type: ts.Type): boolean =>
   !!(type.flags & ts.TypeFlags.Null)
 
 // Check for a specific object type based on type name and property names
-const duckTypeChecker = (name: string, properties: string[]) => (
-  type: ts.Type
-) => {
-  const symbol = type.symbol
-  return (
-    isObjectType(type) &&
-    symbol.escapedName === name &&
-    // If it walks like a duck and it quacks like a duck, then it must be a duck
-    properties.every((name) => symbol.members?.has(name as ts.__String))
-  )
-}
+const duckTypeChecker =
+  (name: string, properties: string[]) => (type: ts.Type) => {
+    const symbol = type.symbol
+    return (
+      isObjectType(type) &&
+      symbol.escapedName === name &&
+      // If it walks like a duck and it quacks like a duck, then it must be a duck
+      properties.every((name) => symbol.members?.has(name as ts.__String))
+    )
+  }
 
 export const isDateType = duckTypeChecker('Date', [
   'getTime',
