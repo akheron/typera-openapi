@@ -229,6 +229,20 @@ const samePathRoute2: Route<Response.Ok<{ bar: number }>> = route
   .post('/same-path-route')
   .handler(async () => Response.ok({ bar: 42 }))
 
+// Route handler not inline
+
+const nonInlineHandler = () => {
+  return Response.ok('hello')
+}
+
+const handlerNotInline: Route<
+  Response.Ok<string> | Response.BadRequest<string>
+> = route
+  .post('/handler-not-inline')
+  // The handler doesn't use the body, but it should still be in the openapi defs
+  .use(Parser.body(t.type({ foo: t.string })))
+  .handler(nonInlineHandler)
+
 export default router(
   constant,
   directRouteCall,
@@ -247,5 +261,6 @@ export default router(
   schemaDocstrings,
   binaryResponse,
   samePathRoute1,
-  samePathRoute2
+  samePathRoute2,
+  handlerNotInline
 )

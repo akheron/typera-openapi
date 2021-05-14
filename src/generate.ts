@@ -278,25 +278,58 @@ const getRouteInput = (
         // Done
         break
       } else if (fnName === 'handler') {
-        const handlerFn = expr.arguments[0]
-        if (
-          !handlerFn ||
-          (!ts.isArrowFunction(handlerFn) &&
-            !ts.isFunctionExpression(handlerFn))
-        ) {
-          ctx.log('warn', 'Handler is not a function')
+        // routeConstructor: {
+        //   handler: (routeHandler: (req) => ...)
+        // }
+        //
+        // We want to dig out the type of `req`.
+        //
+        const routeConstructor = lhs.expression
+        const routeConstructorType =
+          ctx.checker.getTypeAtLocation(routeConstructor)
+        const handlerSymbol = routeConstructorType.getProperty('handler')
+        if (!handlerSymbol) {
+          ctx.log('warn', 'Could not get the type of handler()')
           return
         }
-        const req = handlerFn.parameters[0]
-        if (req) {
-          const type = ctx.checker.getTypeAtLocation(req)
-          body = getPropertyType(ctx.checker, req, type, 'body')
-          query = getPropertyType(ctx.checker, req, type, 'query')
-          headers = getPropertyType(ctx.checker, req, type, 'headers')
-          routeParams = getPropertyType(ctx.checker, req, type, 'routeParams')
-          cookies = getPropertyType(ctx.checker, req, type, 'cookies')
-          requestNode = req
+        const handlerType = ctx.checker.getTypeOfSymbolAtLocation(
+          handlerSymbol,
+          routeConstructor
+        )
+        const handlerParamTypes = handlerType
+          .getCallSignatures()
+          .flatMap((sig) => sig.getParameters())
+          .flatMap((param) =>
+            ctx.checker.getTypeOfSymbolAtLocation(param, routeConstructor)
+          )
+        if (handlerParamTypes.length !== 1) {
+          ctx.log('warn', 'handler() should have one parameter')
+          return
         }
+        const routeHandler = handlerParamTypes[0]
+
+        const routeHandlerParamTypes = routeHandler
+          .getCallSignatures()
+          .flatMap((c) => c.getParameters())
+          .flatMap((param) =>
+            ctx.checker.getTypeOfSymbolAtLocation(param, routeConstructor)
+          )
+        if (routeHandlerParamTypes.length !== 1) {
+          ctx.log('warn', 'Route handler should have one parameter')
+          return
+        }
+        const reqType = routeHandlerParamTypes[0]
+
+        ;[body, query, headers, routeParams, cookies] = [
+          'body',
+          'query',
+          'headers',
+          'routeParams',
+          'cookies',
+        ].map((property) =>
+          getPropertyType(ctx.checker, routeConstructor, reqType, property)
+        )
+        requestNode = routeConstructor
       }
       expr = lhs.expression
     } else {

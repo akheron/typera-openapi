@@ -165,6 +165,49 @@ Array [
           },
         },
       },
+      "/handler-not-inline": Object {
+        "post": Object {
+          "requestBody": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "properties": Object {
+                    "foo": Object {
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "foo",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          },
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "text/plain": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "OK",
+            },
+            "400": Object {
+              "content": Object {
+                "text/plain": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "Bad Request",
+            },
+          },
+        },
+      },
       "/interface-array-response": Object {
         "get": Object {
           "responses": Object {
