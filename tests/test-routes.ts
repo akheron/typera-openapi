@@ -243,6 +243,17 @@ const handlerNotInline: Route<
   .use(Parser.body(t.type({ foo: t.string })))
   .handler(nonInlineHandler)
 
+// Route type is a type alias
+type GetHandler = Route<Response.Ok<string> | Response.BadRequest<string>>
+
+const typeAlias: GetHandler = route.get('/type-alias').handler(() => {
+  if (Math.random() > 0.5) {
+    return Response.ok('foo')
+  } else {
+    return Response.badRequest('bar')
+  }
+})
+
 export default router(
   constant,
   directRouteCall,
@@ -262,5 +273,6 @@ export default router(
   binaryResponse,
   samePathRoute1,
   samePathRoute2,
-  handlerNotInline
+  handlerNotInline,
+  typeAlias
 )
