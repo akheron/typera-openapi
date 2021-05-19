@@ -7,7 +7,6 @@ import {
   isOptional,
   isObjectType,
   isUndefinedType,
-  isPackageSymbol,
   getPropertyType,
   isNullType,
   isStringType,
@@ -20,6 +19,7 @@ import {
   isDateType,
   isBufferType,
   getBrandedType,
+  getPromisePayloadType,
 } from './utils'
 
 interface GenerateOptions {
@@ -311,7 +311,7 @@ const getRouteInput = (
         const routeHandlerParamTypes = routeHandler
           .getCallSignatures()
           .flatMap((c) => c.getParameters())
-          .flatMap((param) =>
+          .map((param) =>
             ctx.checker.getTypeOfSymbolAtLocation(param, routeConstructor)
           )
         if (routeHandlerParamTypes.length !== 1) {
@@ -361,24 +361,43 @@ const getResponseTypes = (
   symbol: ts.Symbol
 ): OpenAPIV3.ResponsesObject | undefined => {
   const descriptions = getResponseDescriptions(symbol)
+  const location = symbol.valueDeclaration
 
-  const routeType = ctx.checker.getTypeOfSymbolAtLocation(
-    symbol,
-    symbol.valueDeclaration
+  const routeType = ctx.checker.getTypeOfSymbolAtLocation(symbol, location)
+
+  // interface Route<Response> {
+  //   ...
+  //   routeHandler: (req: unknown) => Promise<Response>
+  // }
+  //
+  // We want to dig out the type of `Response`.
+
+  const routeHandlerSymbol = routeType.getProperty('routeHandler')
+  if (!routeHandlerSymbol) {
+    ctx.log('warn', 'Not a valid route: No routeHandler method')
+    return
+  }
+  const routeHandlerType = ctx.checker.getTypeOfSymbolAtLocation(
+    routeHandlerSymbol,
+    location
   )
-
-  if (
-    !routeType.aliasSymbol ||
-    !isPackageSymbol(routeType.aliasSymbol, 'typera-common', 'Route')
-  ) {
+  const returnTypes = routeHandlerType
+    .getCallSignatures()
+    .map((c) => c.getReturnType())
+  if (returnTypes.length !== 1) {
+    ctx.log('warn', 'Not a valid route: Invalid routeHandler return type')
     return
   }
 
-  const args = routeType.aliasTypeArguments
-  if (!args || args.length !== 1) {
-    throw new Error('expected 1 type argument for Route')
+  // returnType is a Promise
+  const responseType = getPromisePayloadType(
+    withLocation(ctx, location),
+    returnTypes[0]
+  )
+  if (!responseType) {
+    ctx.log('warn', 'Not a valid route: routeHandler does not return a promise')
+    return
   }
-  const responseType = args[0]
 
   const result: OpenAPIV3.ResponsesObject = {}
   if (isObjectType(responseType)) {

@@ -608,6 +608,32 @@ Array [
           },
         },
       },
+      "/type-alias": Object {
+        "get": Object {
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "text/plain": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "OK",
+            },
+            "400": Object {
+              "content": Object {
+                "text/plain": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "Bad Request",
+            },
+          },
+        },
+      },
       "/unused-request": Object {
         "get": Object {
           "responses": Object {

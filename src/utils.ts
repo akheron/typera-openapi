@@ -68,19 +68,6 @@ export const getPropertyType = (
   return checker.getTypeOfSymbolAtLocation(prop, location)
 }
 
-export const isPackageSymbol = (
-  symbol: ts.Symbol,
-  packageName: string,
-  symbolName: string
-): boolean => {
-  const parent = (symbol.valueDeclaration ?? symbol.declarations[0]).parent
-  return (
-    symbol.name === symbolName &&
-    ts.isSourceFile(parent) &&
-    parent.fileName.includes(`/${packageName}/`)
-  )
-}
-
 export const getBrandedType = (
   ctx: Context,
   type: ts.Type
@@ -97,4 +84,40 @@ export const getBrandedType = (
   const brandedType = type.types[brandIndex === 1 ? 0 : 1]
 
   return { brandName, brandedType }
+}
+
+export const getPromisePayloadType = (
+  ctx: Context,
+  type: ts.Type
+): ts.Type | undefined => {
+  // Find out the payload type from `then`'s first parameter.
+  if (type.symbol.escapedName !== 'Promise') return
+
+  const thenSymbol = type.getProperty('then')
+  if (!thenSymbol) return
+  const thenType = ctx.checker.getTypeOfSymbolAtLocation(
+    thenSymbol,
+    ctx.location
+  )
+
+  const thenParamType = thenType
+    .getCallSignatures()
+    .flatMap((c) => c.getParameters())
+    .map((c) => ctx.checker.getTypeOfSymbolAtLocation(c, ctx.location))[0]
+
+  if (!thenParamType) return
+
+  const onResolvedType = thenParamType.isUnion()
+    ? thenParamType.types.find((t) => !isUndefinedType(t) && !isNullType(t))
+    : thenParamType
+  if (!onResolvedType) return
+
+  const onResolvedArgTypes = onResolvedType
+    .getCallSignatures()
+    .flatMap((c) => c.getParameters())
+    .map((c) => ctx.checker.getTypeOfSymbolAtLocation(c, ctx.location))
+
+  if (onResolvedArgTypes.length === 0) return
+
+  return onResolvedArgTypes[0]
 }
