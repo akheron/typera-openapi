@@ -70,6 +70,7 @@ const visit = (
 
     argSymbols.forEach((symbol) => {
       const location = symbol.valueDeclaration
+      if (!location) return
       const routeDeclaration = getRouteDeclaration(
         withLocation(ctx, location),
         symbol
@@ -170,16 +171,17 @@ const getRouteSummary = (symbol: ts.Symbol): string | undefined =>
   symbol
     .getJsDocTags()
     .filter((tag) => tag.name === 'summary')
-    .map((tag) => tag.text)
-    .filter(isDefined)[0]
+    .flatMap((tag) => tag.text)
+    .filter(isDefined)
+    .map((symbolDisplayPart) => symbolDisplayPart.text)[0]
 
 const getRouteTags = (symbol: ts.Symbol): string[] | undefined =>
   symbol
     .getJsDocTags()
     .filter((tag) => tag.name === 'tags')
-    .map((tag) => tag.text?.split(','))
+    .flatMap((tag) => tag.text)
     .filter(isDefined)
-    .flat()
+    .flatMap((symbolDisplayPart) => symbolDisplayPart.text.split(','))
     .map((tag) => tag.trim())
 
 const operationRequestBody = (
@@ -222,7 +224,7 @@ const getRouteInput = (
   symbol: ts.Symbol
 ): RouteInput | undefined => {
   const declaration = symbol.valueDeclaration
-  if (!ts.isVariableDeclaration(declaration)) return
+  if (!declaration || !ts.isVariableDeclaration(declaration)) return
 
   let expr = declaration.initializer
   if (!expr) return
@@ -362,6 +364,7 @@ const getResponseTypes = (
 ): OpenAPIV3.ResponsesObject | undefined => {
   const descriptions = getResponseDescriptions(symbol)
   const location = symbol.valueDeclaration
+  if (!location) return
 
   const routeType = ctx.checker.getTypeOfSymbolAtLocation(symbol, location)
 
@@ -425,8 +428,9 @@ const getResponseDescriptions = (
     symbol
       .getJsDocTags()
       .filter((tag) => tag.name === 'response')
-      .map((tag) => tag.text)
+      .flatMap((tag) => tag.text)
       .filter(isDefined)
+      .flatMap((symbolDisplayPart) => symbolDisplayPart.text)
       .map((text) => {
         const match = /(\d{3}) (.+)/.exec(text)
         if (!match) return undefined
@@ -443,7 +447,12 @@ const getResponseDefinition = (
   const statusSymbol = responseType.getProperty('status')
   const bodySymbol = responseType.getProperty('body')
   const headersSymbol = responseType.getProperty('headers')
-  if (!statusSymbol || !bodySymbol || !headersSymbol) return
+  if (
+    !statusSymbol?.valueDeclaration ||
+    !bodySymbol?.valueDeclaration ||
+    !headersSymbol?.valueDeclaration
+  )
+    return
 
   const statusType = ctx.checker.getTypeOfSymbolAtLocation(
     statusSymbol,
