@@ -15,11 +15,12 @@
   },
   "scripts": {
     "build": "tsc",
+    "clean": "rm -rf dist",
     "lint": "eslint --max-warnings 0 '**/*.ts' && prettier --check \"**/*.{json,md}\"",
     "lint:fix": "eslint --fix '**/*.ts' && prettier --write '**/*.{json,md}'",
     "test": "jest",
     "doctoc": "doctoc README.md --title '## Table of Contents' && prettier --write README.md",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "yarn clean && yarn build"
   },
   "dependencies": {
     "openapi-types": "^9.0.0",
