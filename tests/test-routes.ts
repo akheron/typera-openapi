@@ -13,6 +13,7 @@ import {
   NonEmptyString,
   NumberFromString,
 } from 'io-ts-types'
+import otherFileDefaultExport, { otherFileExport } from './exported-routes'
 
 /**
  * No input, static output, has a tag
@@ -274,5 +275,7 @@ export default router(
   samePathRoute1,
   samePathRoute2,
   handlerNotInline,
-  typeAlias
+  typeAlias,
+  otherFileExport, // export from another module
+  otherFileDefaultExport // default export from another module
 )

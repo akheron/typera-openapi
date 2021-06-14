@@ -295,6 +295,38 @@ Array [
           },
         },
       },
+      "/other-file-default-export": Object {
+        "get": Object {
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "text/plain": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "OK",
+            },
+          },
+        },
+      },
+      "/other-file-export": Object {
+        "get": Object {
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "text/plain": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "OK",
+            },
+          },
+        },
+      },
       "/query": Object {
         "get": Object {
           "parameters": Array [

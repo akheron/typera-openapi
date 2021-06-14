@@ -47,7 +47,10 @@ export const generate = (
     if (sourceFile.isDeclarationFile) continue
 
     ts.forEachChild(sourceFile, (node) => {
-      const paths = visit(context(checker, sourceFile, log, node), node)
+      const paths = visitTopLevelNode(
+        context(checker, sourceFile, log, node),
+        node
+      )
       if (paths) {
         result.push({ fileName: sourceFile.fileName, paths })
       }
@@ -57,7 +60,7 @@ export const generate = (
   return result
 }
 
-const visit = (
+const visitTopLevelNode = (
   ctx: Context,
   node: ts.Node
 ): OpenAPIV3.PathsObject | undefined => {
@@ -69,8 +72,18 @@ const visit = (
     const paths: OpenAPIV3.PathsObject = {}
 
     argSymbols.forEach((symbol) => {
-      const location = symbol.valueDeclaration
-      if (!location) return
+      let location = symbol.valueDeclaration
+      if (!location && symbol.flags & ts.SymbolFlags.Alias) {
+        symbol = ctx.checker.getAliasedSymbol(symbol)
+        location = symbol.valueDeclaration
+      }
+      if (!location) {
+        ctx.log(
+          'warn',
+          `Could not find the definition of router arg ${symbol.name}`
+        )
+        return
+      }
       const routeDeclaration = getRouteDeclaration(
         withLocation(ctx, location),
         symbol
@@ -118,7 +131,10 @@ const getRouteDeclaration = (
   const summary = getRouteSummary(symbol)
   const tags = getRouteTags(symbol)
   const routeInput = getRouteInput(ctx, symbol)
-  if (!routeInput) return
+  if (!routeInput) {
+    ctx.log('warn', `Could not determine route input for symbol ${symbol.name}`)
+    return
+  }
   const {
     method,
     path,
@@ -224,9 +240,13 @@ const getRouteInput = (
   symbol: ts.Symbol
 ): RouteInput | undefined => {
   const declaration = symbol.valueDeclaration
-  if (!declaration || !ts.isVariableDeclaration(declaration)) return
+  if (!declaration) return
 
-  let expr = declaration.initializer
+  let expr = ts.isVariableDeclaration(declaration)
+    ? declaration.initializer
+    : ts.isExportAssignment(declaration)
+    ? declaration.expression
+    : undefined
   if (!expr) return
 
   let method: Method | undefined,
