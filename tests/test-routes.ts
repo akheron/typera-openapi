@@ -202,8 +202,13 @@ const documentedCodec = t.type({
   inputField: t.number,
 })
 
+const documentedQuery = t.type({
+  /** Foo bar baz */
+  param: t.string,
+})
+
 interface DocumentedInterface {
-  /** OUtput field description here */
+  /** Output field description here */
   outputField: string
 }
 
@@ -211,9 +216,11 @@ const schemaDocstrings: Route<
   Response.Ok<DocumentedInterface> | Response.BadRequest<string>
 > = route
   .get('/schema-docstrings')
-  .use(Parser.body(documentedCodec))
+  .use(Parser.body(documentedCodec), Parser.query(documentedQuery))
   .handler(async (request) => {
-    return Response.ok({ outputField: request.body.inputField + '' })
+    return Response.ok({
+      outputField: request.body.inputField + request.query.param,
+    })
   })
 
 // Binary response body

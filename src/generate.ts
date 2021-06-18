@@ -547,11 +547,15 @@ const typeToParameters = (
   if (!type) return []
 
   const props = ctx.checker.getPropertiesOfType(type)
-  return props.map((prop) => ({
-    name: prop.name,
-    in: in_,
-    required: in_ === 'path' ? true : !isOptional(prop),
-  }))
+  return props.map((prop): OpenAPIV3.ParameterObject => {
+    const description = getDescriptionFromComment(ctx, prop)
+    return {
+      name: prop.name,
+      in: in_,
+      required: in_ === 'path' ? true : !isOptional(prop),
+      ...(description ? { description } : undefined),
+    }
+  })
 }
 
 interface Headers {
