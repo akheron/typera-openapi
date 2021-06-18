@@ -589,6 +589,14 @@ Array [
       },
       "/schema-docstrings": Object {
         "get": Object {
+          "parameters": Array [
+            Object {
+              "description": "Foo bar baz",
+              "in": "query",
+              "name": "param",
+              "required": true,
+            },
+          ],
           "requestBody": Object {
             "content": Object {
               "application/json": Object {
@@ -614,7 +622,7 @@ Array [
                   "schema": Object {
                     "properties": Object {
                       "outputField": Object {
-                        "description": "OUtput field description here",
+                        "description": "Output field description here",
                         "type": "string",
                       },
                     },
