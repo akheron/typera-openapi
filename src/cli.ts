@@ -51,7 +51,7 @@ const outputFileName = (sourceFileName: string, ext: string): string =>
 const main = async () => {
   const args = parseArgs()
 
-  const sourceFiles = args._.map((x) => x.toString())
+  const sourceFiles = args._.map((x) => path.resolve(x.toString()))
   const ext = `.openapi.${args.format}`
 
   const compilerOptions = readCompilerOptions(args.tsconfig)
