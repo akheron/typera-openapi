@@ -29,7 +29,7 @@
     "yargs": "^17.0.0"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.20",
+    "@types/jest": "^27.0.0",
     "@types/node": "*",
     "@types/statuses": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^4.12.0",
