@@ -14,6 +14,7 @@ import {
   NumberFromString,
 } from 'io-ts-types'
 import otherFileDefaultExport, { otherFileExport } from './exported-routes'
+import { formUrlEncodedMiddleware } from './middlewares'
 
 /**
  * No input, static output, has a tag
@@ -262,6 +263,16 @@ const typeAlias: GetHandler = route.get('/type-alias').handler(() => {
   }
 })
 
+const withContentTypeMiddleware: Route<
+  Response.Ok<string> | Response.BadRequest<string>
+> = route
+  .post('/with-content-type-middleware')
+  .use(formUrlEncodedMiddleware)
+  .use(Parser.body(t.type({ a: t.string })))
+  .handler(async (request) => {
+    return Response.ok(request.body.a)
+  })
+
 export default router(
   constant,
   directRouteCall,
@@ -283,6 +294,7 @@ export default router(
   samePathRoute2,
   handlerNotInline,
   typeAlias,
+  withContentTypeMiddleware,
   otherFileExport, // export from another module
   otherFileDefaultExport // default export from another module
 )

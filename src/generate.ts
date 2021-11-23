@@ -144,7 +144,13 @@ const getRouteDeclaration = (
     headers,
     routeParams,
     cookies,
+    contentType,
   } = routeInput
+
+  const contentTypeString =
+    contentType && isStringLiteralType(contentType)
+      ? ctx.checker.typeToString(contentType).replace(/"/g, '')
+      : undefined
 
   const responses = getResponseTypes(ctx, symbol)
   if (!responses) return
@@ -171,7 +177,7 @@ const getRouteDeclaration = (
       ...(description ? { description } : undefined),
       ...(tags && tags.length > 0 ? { tags } : undefined),
       ...(parameters.length > 0 ? { parameters } : undefined),
-      ...operationRequestBody(requestBody),
+      ...operationRequestBody(requestBody, contentTypeString),
       responses,
     },
   ]
@@ -201,11 +207,13 @@ const getRouteTags = (symbol: ts.Symbol): string[] | undefined =>
     .map((tag) => tag.trim())
 
 const operationRequestBody = (
-  contentSchema: OpenAPIV3.SchemaObject | undefined
+  contentSchema: OpenAPIV3.SchemaObject | undefined,
+  contentType = 'application/json'
 ): { requestBody: OpenAPIV3.RequestBodyObject } | undefined => {
   if (!contentSchema) return
+
   return {
-    requestBody: { content: { 'application/json': { schema: contentSchema } } },
+    requestBody: { content: { [contentType]: { schema: contentSchema } } },
   }
 }
 
@@ -233,6 +241,7 @@ interface RouteInput {
   headers: ts.Type | undefined
   routeParams: ts.Type | undefined
   cookies: ts.Type | undefined
+  contentType: ts.Type | undefined
 }
 
 const getRouteInput = (
@@ -256,7 +265,8 @@ const getRouteInput = (
     query: ts.Type | undefined,
     routeParams: ts.Type | undefined,
     headers: ts.Type | undefined,
-    cookies: ts.Type | undefined
+    cookies: ts.Type | undefined,
+    contentType: ts.Type | undefined
 
   while (ts.isCallExpression(expr)) {
     const lhs: ts.LeftHandSideExpression = expr.expression
@@ -342,12 +352,13 @@ const getRouteInput = (
         }
         const reqType = routeHandlerParamTypes[0]
 
-        ;[body, query, headers, routeParams, cookies] = [
+        ;[body, query, headers, routeParams, cookies, contentType] = [
           'body',
           'query',
           'headers',
           'routeParams',
           'cookies',
+          'contentType',
         ].map((property) =>
           getPropertyType(ctx.checker, routeConstructor, reqType, property)
         )
@@ -375,6 +386,7 @@ const getRouteInput = (
     headers,
     routeParams,
     cookies,
+    contentType,
   }
 }
 
