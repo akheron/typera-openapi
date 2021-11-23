@@ -746,6 +746,49 @@ Array [
           },
         },
       },
+      "/with-content-type-middleware": Object {
+        "post": Object {
+          "requestBody": Object {
+            "content": Object {
+              "application/x-www-form-urlencoded": Object {
+                "schema": Object {
+                  "properties": Object {
+                    "a": Object {
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "a",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          },
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "text/plain": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "OK",
+            },
+            "400": Object {
+              "content": Object {
+                "text/plain": Object {
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              },
+              "description": "Bad Request",
+            },
+          },
+        },
+      },
     },
   },
 ]
