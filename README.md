@@ -14,6 +14,7 @@ for projects that use [typera] for routes.
 - [CLI](#cli)
 - [How it works?](#how-it-works)
   - [The `Date` type](#the-date-type)
+- [Reference](#reference)
 - [Releasing](#releasing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
