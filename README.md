@@ -208,6 +208,67 @@ it is parsed, so it uses `string` and sets `format` to `date-time`, because this
 is how `JSON.stringify` encodes `Date` objects by default. In the future we may
 add a way to override this behavior.
 
+## Reference
+
+Terms:
+
+- Route means an OpenAPI operation, i.e. an endpoint you can request.
+- `route` is the typera object that lets you create routes, see
+  [the docs](https://akheron.github.io/typera/apiref/#route).
+- Route handler is the function passed to `.handler()` when defining a route
+- `request` is the sole parameter of the route handler function.
+- Route type is the type of the route variable returned by `route.get()` etc.
+
+For each route, typera-openapi determines the following information:
+
+| Information  | Source                                             |
+| ------------ | -------------------------------------------------- |
+| method       | Which `route` method is called, e.g. `route.get()` |
+| path         | The parameter of e.g. `route.get()`                |
+| summary      | JSDoc comment's `@summary` tag                     |
+| description  | JSDoc comment's text                               |
+| tags         | JSDoc comment's `@tags`                            |
+| parameters   | See table below                                    |
+| request body | See table below                                    |
+| responses    | See table below                                    |
+
+OpenAPI parameters covers all the other input expect the request body:
+
+| Parameter | Source                                                                                         |
+| --------- | ---------------------------------------------------------------------------------------------- |
+| path      | [Route parameter captures](https://akheron.github.io/typera/apiref/#route-parameter-capturing) |
+| query     | The type of `request.query` (the output of `Parser.query` or custom middleware)                |
+| header    | The type of `request.headers` (the output of `Parser.headers` or custom middleware)            |
+| cookie    | The type of `request.cookies` (the output of `Parser.cookies` or custom middleware)            |
+
+OpenAPI allows different request body types per content type, but typera-openapi
+only allows one.
+
+| Body field   | Source                                                                        |
+| ------------ | ----------------------------------------------------------------------------- |
+| content type | `request.contentType`, or `'application/json'` if not defined                 |
+| schema       | The type of `request.body` (the output of `Parser.body` or custom middleware) |
+
+A route can have multiple responses. These are modeled in the route type as
+`Route<Response1 | Response2 | ...>`. See
+[the docs](https://akheron.github.io/typera/apiref/#responses). Each response
+type adds a response to the OpenAPI document.
+
+| Response field | Source                                         |
+| -------------- | ---------------------------------------------- |
+| status         | Response's `Status` type (number literal type) |
+| description    | JSDoc comment's `@response` tag                |
+| content type   | See below                                      |
+| content schema | Response's `Body` type                         |
+| headers        | Response's `Headers` type                      |
+
+Response's content type is determined as follows:
+
+- `text/plain` if the body type is string or number
+- `application/octet-stream` for
+  [streaming responses](https://akheron.github.io/typera/apiref/#streaming-responses)
+- `application/json` otherwise
+
 ## Releasing
 
 ```
