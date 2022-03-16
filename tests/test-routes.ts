@@ -273,6 +273,32 @@ const withContentTypeMiddleware: Route<
     return Response.ok(request.body.a)
   })
 
+interface DirectRecursiveType {
+  id: string
+  children: DirectRecursiveType[]
+}
+
+type DirectRecursiveIntersection = { id: string } & {
+  children: DirectRecursiveIntersection
+}
+
+interface IndirectRecursiveType {
+  hello: string
+  items: MutuallyRecursive[]
+}
+
+interface MutuallyRecursive {
+  other: IndirectRecursiveType
+}
+
+const recursiveTypes: Route<
+  | Response.Ok<DirectRecursiveType>
+  | Response.Ok<DirectRecursiveIntersection>
+  | Response.Ok<IndirectRecursiveType>
+> = route.get('/recursive-types').handler(async () => {
+  return Response.ok({ id: 'hell', children: [] })
+})
+
 export default router(
   constant,
   directRouteCall,
@@ -295,6 +321,7 @@ export default router(
   handlerNotInline,
   typeAlias,
   withContentTypeMiddleware,
+  recursiveTypes,
   otherFileExport, // export from another module
   otherFileDefaultExport // default export from another module
 )

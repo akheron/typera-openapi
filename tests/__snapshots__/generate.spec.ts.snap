@@ -13,6 +13,116 @@ Array [
 exports[`generate works 1`] = `
 Array [
   Object {
+    "components": Object {
+      "schemas": Object {
+        "DirectRecursiveIntersection": Object {
+          "properties": Object {
+            "children": Object {
+              "$ref": "#/components/schemas/DirectRecursiveIntersection",
+            },
+            "id": Object {
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "id",
+            "children",
+          ],
+          "type": "object",
+        },
+        "DirectRecursiveType": Object {
+          "properties": Object {
+            "children": Object {
+              "items": Object {
+                "$ref": "#/components/schemas/DirectRecursiveType",
+              },
+              "type": "array",
+            },
+            "id": Object {
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "id",
+            "children",
+          ],
+          "type": "object",
+        },
+        "DocumentedInterface": Object {
+          "properties": Object {
+            "outputField": Object {
+              "description": "Output field description here",
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "outputField",
+          ],
+          "type": "object",
+        },
+        "IndirectRecursiveType": Object {
+          "properties": Object {
+            "hello": Object {
+              "type": "string",
+            },
+            "items": Object {
+              "items": Object {
+                "$ref": "#/components/schemas/MutuallyRecursive",
+              },
+              "type": "array",
+            },
+          },
+          "required": Array [
+            "hello",
+            "items",
+          ],
+          "type": "object",
+        },
+        "MutuallyRecursive": Object {
+          "properties": Object {
+            "other": Object {
+              "$ref": "#/components/schemas/IndirectRecursiveType",
+            },
+          },
+          "required": Array [
+            "other",
+          ],
+          "type": "object",
+        },
+        "User": Object {
+          "properties": Object {
+            "petName": Object {
+              "nullable": true,
+              "type": "string",
+            },
+            "shoeSize": Object {
+              "type": "number",
+            },
+            "updated": Object {
+              "format": "date-time",
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "shoeSize",
+            "petName",
+            "updated",
+          ],
+          "type": "object",
+        },
+        "User2": Object {
+          "properties": Object {
+            "name": Object {
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "name",
+          ],
+          "type": "object",
+        },
+      },
+    },
     "fileName": "tests/test-routes.ts",
     "paths": Object {
       "/binary-response": Object {
@@ -216,25 +326,7 @@ Array [
                 "application/json": Object {
                   "schema": Object {
                     "items": Object {
-                      "properties": Object {
-                        "petName": Object {
-                          "nullable": true,
-                          "type": "string",
-                        },
-                        "shoeSize": Object {
-                          "type": "number",
-                        },
-                        "updated": Object {
-                          "format": "date-time",
-                          "type": "string",
-                        },
-                      },
-                      "required": Array [
-                        "shoeSize",
-                        "petName",
-                        "updated",
-                      ],
-                      "type": "object",
+                      "$ref": "#/components/schemas/User",
                     },
                     "type": "array",
                   },
@@ -252,25 +344,7 @@ Array [
               "content": Object {
                 "application/json": Object {
                   "schema": Object {
-                    "properties": Object {
-                      "petName": Object {
-                        "nullable": true,
-                        "type": "string",
-                      },
-                      "shoeSize": Object {
-                        "type": "number",
-                      },
-                      "updated": Object {
-                        "format": "date-time",
-                        "type": "string",
-                      },
-                    },
-                    "required": Array [
-                      "shoeSize",
-                      "petName",
-                      "updated",
-                    ],
-                    "type": "object",
+                    "$ref": "#/components/schemas/User",
                   },
                 },
               },
@@ -316,9 +390,9 @@ Array [
           "responses": Object {
             "200": Object {
               "content": Object {
-                "text/plain": Object {
+                "application/json": Object {
                   "schema": Object {
-                    "type": "string",
+                    "$ref": "#/components/schemas/User2",
                   },
                 },
               },
@@ -361,6 +435,22 @@ Array [
                 },
               },
               "description": "Bad Request",
+            },
+          },
+        },
+      },
+      "/recursive-types": Object {
+        "get": Object {
+          "responses": Object {
+            "200": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "$ref": "#/components/schemas/IndirectRecursiveType",
+                  },
+                },
+              },
+              "description": "OK",
             },
           },
         },
@@ -620,16 +710,7 @@ Array [
               "content": Object {
                 "application/json": Object {
                   "schema": Object {
-                    "properties": Object {
-                      "outputField": Object {
-                        "description": "Output field description here",
-                        "type": "string",
-                      },
-                    },
-                    "required": Array [
-                      "outputField",
-                    ],
-                    "type": "object",
+                    "$ref": "#/components/schemas/DocumentedInterface",
                   },
                 },
               },
