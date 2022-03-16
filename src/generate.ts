@@ -70,6 +70,8 @@ const visitTopLevelNode = (
   node: ts.Node
 ): OpenAPIV3.PathsObject | undefined => {
   if (ts.isExportAssignment(node) && !node.isExportEquals) {
+    const prefix = getRouterPrefix(node)
+
     // 'export default' statement
     const argSymbols = getRouterCallArgSymbols(ctx, node.expression)
     if (!argSymbols) return
@@ -96,9 +98,10 @@ const visitTopLevelNode = (
       )
       if (routeDeclaration) {
         const [path, method, operation] = routeDeclaration
-        const pathsItemObject = paths[path]
+        const prefixedPath = prefix + path
+        const pathsItemObject = paths[prefixedPath]
         if (!pathsItemObject) {
-          paths[path] = { [method]: operation }
+          paths[prefixedPath] = { [method]: operation }
         } else {
           pathsItemObject[method] = operation
         }
@@ -212,6 +215,12 @@ const getRouteTags = (symbol: ts.Symbol): string[] | undefined =>
     .filter(isDefined)
     .flatMap((symbolDisplayPart) => symbolDisplayPart.text.split(','))
     .map((tag) => tag.trim())
+
+const getRouterPrefix = (node: ts.Node): string =>
+  ts
+    .getJSDocTags(node)
+    .filter((tag) => tag.tagName.escapedText === 'prefix')
+    .flatMap((tag) => (typeof tag.comment === 'string' ? [tag.comment] : []))[0] ?? ''
 
 const operationRequestBody = (
   contentSchema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined,

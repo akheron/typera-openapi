@@ -60,13 +60,27 @@ const openapiDoc: OpenAPIV3.Document = {
     version: '0.1.0',
   },
   paths: {
-    ...routeDefs.paths,
-    ...otherDefs.paths
+    ...prefix('/api', routeDefs.paths),
+    ...prefix('/other', otherDefs.paths),
   }
 }
 ```
 
 New:
+
+Use the `@prefix` JSDoc tag to move routes to a different prefix:
+
+`routes.ts`
+
+```
+/**
+ * @prefix /api
+ */
+export default router(myRoute, ...)
+```
+
+The file that has the final OpenAPI document doesn't need to use the `prefix`
+function anymore:
 
 ```
 import openapi from './openapi'
