@@ -28,6 +28,10 @@ export const isUndefinedType = (type: ts.Type): boolean =>
   !!(type.flags & ts.TypeFlags.Undefined)
 export const isNullType = (type: ts.Type): boolean =>
   !!(type.flags & ts.TypeFlags.Null)
+export const isInterface = (symbol: ts.Symbol): boolean =>
+  !!(symbol.flags & ts.SymbolFlags.Interface)
+export const isTypeAlias = (symbol: ts.Symbol): boolean =>
+  !!(symbol.flags & ts.SymbolFlags.TypeAlias)
 
 // Check for a specific object type based on type name and property names
 const duckTypeChecker =

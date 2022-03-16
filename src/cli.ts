@@ -69,8 +69,11 @@ const main = async () => {
   }))
 
   let success = true
-  for (const { outputFileName, paths } of results) {
-    let content = args.format === 'ts' ? tsString(paths) : jsonString(paths)
+  for (const { outputFileName, paths, components } of results) {
+    let content =
+      args.format === 'ts'
+        ? tsString(paths, components)
+        : jsonString(paths, components)
     if (args.prettify) {
       content = await runPrettier(outputFileName, content)
     }
@@ -133,15 +136,22 @@ const writeOutput = (fileName: string, content: string): void => {
   fs.writeFileSync(fileName, content)
 }
 
-const tsString = (paths: OpenAPIV3.PathsObject): string => `\
+const tsString = (
+  paths: OpenAPIV3.PathsObject,
+  components: OpenAPIV3.ComponentsObject
+): string => `\
 import { OpenAPIV3 } from 'openapi-types'
 
-const spec: { paths: OpenAPIV3.PathsObject } = ${JSON.stringify({ paths })};
+const spec: { paths: OpenAPIV3.PathsObject, components: OpenAPIV3.ComponentsObject } = ${JSON.stringify(
+  { paths, components }
+)};
 
 export default spec;
 `
 
-const jsonString = (paths: OpenAPIV3.PathsObject): string =>
-  JSON.stringify({ paths })
+const jsonString = (
+  paths: OpenAPIV3.PathsObject,
+  components: OpenAPIV3.ComponentsObject
+): string => JSON.stringify({ paths, components })
 
 main()
