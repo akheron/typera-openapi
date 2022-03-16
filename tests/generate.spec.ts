@@ -5,11 +5,12 @@ const relativePath = (fileName: string): string =>
   path.relative(process.cwd(), __dirname + '/' + fileName)
 
 const testRoutes = relativePath('test-routes.ts')
+const otherRoutes = relativePath('other-routes.ts')
 const warningRoutes = relativePath('warning-routes.ts')
 
 describe('generate', () => {
   it('works', () => {
-    const result = generate([testRoutes], { strict: true })
+    const result = generate([testRoutes, otherRoutes], { strict: true })
     expect(result).toMatchSnapshot()
   })
 

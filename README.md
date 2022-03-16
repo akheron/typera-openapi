@@ -83,7 +83,7 @@ import * as swaggerUi from 'swagger-ui-express'
 import { prefix } from 'typera-openapi'
 
 import myRoutes from './my-routes'
-import myRouteDefs from './my-routes.openapi'
+import openapi from './openapi'
 
 const openapiDoc: OpenAPIV3.Document = {
   openapi: '3.0.0',
@@ -91,9 +91,7 @@ const openapiDoc: OpenAPIV3.Document = {
     title: 'My cool API',
     version: '0.1.0',
   },
-  paths: {
-    ...prefix('/api', myRouteDefs.paths),
-  },
+  ...openapi,
 }
 
 const app = express()
@@ -101,9 +99,6 @@ app.use('/api', myRoutes.handler())
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiDoc))
 app.listen(3000)
 ```
-
-The `prefix` function is used to move OpenAPI path definitions to a different
-prefix, because the `myRoutes` are served from the `/api` prefix.
 
 ## CLI
 
