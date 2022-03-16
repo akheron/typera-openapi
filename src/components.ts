@@ -40,7 +40,7 @@ export class Components {
         return schema
       }
     } else {
-      return run(() => {})
+      return run(() => undefined)
     }
   }
 

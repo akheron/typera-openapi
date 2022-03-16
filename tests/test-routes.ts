@@ -278,7 +278,7 @@ interface DirectRecursiveType {
   children: DirectRecursiveType[]
 }
 
-type DirectRecursiveIntersection = { id: string } & {
+type DirectRecursiveIntersection = { id: string } & {
   children: DirectRecursiveIntersection
 }
 

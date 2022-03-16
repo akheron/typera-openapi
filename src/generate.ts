@@ -55,13 +55,13 @@ export const generate = (
         node
       )
       if (newPaths) {
-        // TODO: What if a route is defined multiple times?
+        // TODO: What if a route is defined multiple times?
         paths = { ...paths, ...newPaths }
       }
     })
   }
 
-  return { paths, components: components.build() }
+  return { paths, components: components.build() }
 }
 
 const visitTopLevelNode = (
@@ -220,7 +220,9 @@ const getRouterPrefix = (node: ts.Node): string =>
   ts
     .getJSDocTags(node)
     .filter((tag) => tag.tagName.escapedText === 'prefix')
-    .flatMap((tag) => (typeof tag.comment === 'string' ? [tag.comment] : []))[0] ?? ''
+    .flatMap((tag) =>
+      typeof tag.comment === 'string' ? [tag.comment] : []
+    )[0] ?? ''
 
 const operationRequestBody = (
   contentSchema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined,
@@ -630,152 +632,160 @@ const typeToSchema = (
   type: ts.Type,
   options: { propSymbol?: ts.Symbol; optional?: boolean } = {}
 ): OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined =>
-  components.withSymbol(type.aliasSymbol ?? type.getSymbol(), (addComponent) => {
-    let base = getBaseSchema(ctx, options.propSymbol)
+  components.withSymbol(
+    type.aliasSymbol ?? type.getSymbol(),
+    (addComponent) => {
+      let base = getBaseSchema(ctx, options.propSymbol)
 
-    if (type.isUnion()) {
-      let elems = type.types
+      if (type.isUnion()) {
+        let elems = type.types
 
-      if (options.optional) {
-        elems = type.types.filter((elem) => !isUndefinedType(elem))
+        if (options.optional) {
+          elems = type.types.filter((elem) => !isUndefinedType(elem))
+        }
+
+        if (elems.some(isNullType)) {
+          // One of the union elements is null
+          base = { ...base, nullable: true }
+          elems = elems.filter((elem) => !isNullType(elem))
+        }
+
+        if (elems.every(isBooleanLiteralType)) {
+          // All elements are boolean literals => boolean
+          return { type: 'boolean', ...base }
+        }
+
+        if (elems.every(isNumberLiteralType)) {
+          // All elements are number literals => enum
+          addComponent()
+          return {
+            type: 'number',
+            enum: elems.map((elem) => elem.value),
+            ...base,
+          }
+        } else if (elems.every(isStringLiteralType)) {
+          // All elements are string literals => enum
+          addComponent()
+          return {
+            type: 'string',
+            enum: elems.map((elem) => elem.value),
+            ...base,
+          }
+        } else if (elems.length >= 2) {
+          // 2 or more types remain => anyOf
+          addComponent()
+          return {
+            anyOf: elems
+              .map((elem) => typeToSchema(ctx, components, elem))
+              .filter(isDefined),
+            ...base,
+          }
+        } else {
+          // Only one element left in the union. Fall through and consider it as the
+          // sole type.
+          type = elems[0]
+        }
       }
 
-      if (elems.some(isNullType)) {
-        // One of the union elements is null
-        base = { ...base, nullable: true }
-        elems = elems.filter((elem) => !isNullType(elem))
+      if (isArrayType(type)) {
+        const elemType = type.getNumberIndexType()
+        if (!elemType) {
+          ctx.log('warn', 'Could not get array element type')
+          return
+        }
+        const elemSchema = typeToSchema(ctx, components, elemType)
+        if (!elemSchema) return
+
+        return { type: 'array', items: elemSchema, ...base }
       }
 
-      if (elems.every(isBooleanLiteralType)) {
-        // All elements are boolean literals => boolean
+      if (isDateType(type)) {
+        // TODO: dates are always represented as date-time strings. It should be
+        // possible to override this.
+        return { type: 'string', format: 'date-time', ...base }
+      }
+
+      if (isBufferType(type)) {
+        return { type: 'string', format: 'binary', ...base }
+      }
+
+      if (
+        isObjectType(type) ||
+        (type.isIntersection() &&
+          type.types.every((part) => isObjectType(part)))
+      ) {
+        addComponent()
+        const props = ctx.checker.getPropertiesOfType(type)
+        return {
+          type: 'object',
+          required: props
+            .filter((prop) => !isOptional(prop))
+            .map((prop) => prop.name),
+          ...base,
+          properties: Object.fromEntries(
+            props
+              .map((prop) => {
+                const propType = ctx.checker.getTypeOfSymbolAtLocation(
+                  prop,
+                  ctx.location
+                )
+                if (!propType) {
+                  ctx.log('warn', 'Could not get type for property', prop.name)
+                  return
+                }
+                const propSchema = typeToSchema(ctx, components, propType, {
+                  propSymbol: prop,
+                  optional: isOptional(prop),
+                })
+                if (!propSchema) {
+                  ctx.log(
+                    'warn',
+                    'Could not get schema for property',
+                    prop.name
+                  )
+                  return
+                }
+                return [prop.name, propSchema]
+              })
+              .filter(isDefined)
+          ),
+        }
+      }
+
+      if (isStringType(type)) {
+        return { type: 'string', ...base }
+      }
+      if (isNumberType(type)) {
+        return { type: 'number', ...base }
+      }
+      if (isBooleanType(type)) {
         return { type: 'boolean', ...base }
       }
+      if (isStringLiteralType(type)) {
+        return { type: 'string', enum: [type.value], ...base }
+      }
+      if (isNumberLiteralType(type)) {
+        return { type: 'number', enum: [type.value], ...base }
+      }
 
-      if (elems.every(isNumberLiteralType)) {
-        // All elements are number literals => enum
-        addComponent()
-        return {
-          type: 'number',
-          enum: elems.map((elem) => elem.value),
-          ...base,
+      const branded = getBrandedType(ctx, type)
+      if (branded) {
+        // io-ts branded type
+        const { brandName, brandedType } = branded
+
+        if (brandName === 'Brand<IntBrand>') {
+          // io-ts Int
+          return { type: 'integer', ...base }
         }
-      } else if (elems.every(isStringLiteralType)) {
-        // All elements are string literals => enum
-        addComponent()
-        return {
-          type: 'string',
-          enum: elems.map((elem) => elem.value),
-          ...base,
-        }
-      } else if (elems.length >= 2) {
-        // 2 or more types remain => anyOf
-        addComponent()
-        return {
-          anyOf: elems
-            .map((elem) => typeToSchema(ctx, components, elem))
-            .filter(isDefined),
-          ...base,
-        }
-      } else {
-        // Only one element left in the union. Fall through and consider it as the
-        // sole type.
-        type = elems[0]
-      }
-    }
 
-    if (isArrayType(type)) {
-      const elemType = type.getNumberIndexType()
-      if (!elemType) {
-        ctx.log('warn', 'Could not get array element type')
-        return
-      }
-      const elemSchema = typeToSchema(ctx, components, elemType)
-      if (!elemSchema) return
-
-      return { type: 'array', items: elemSchema, ...base }
-    }
-
-    if (isDateType(type)) {
-      // TODO: dates are always represented as date-time strings. It should be
-      // possible to override this.
-      return { type: 'string', format: 'date-time', ...base }
-    }
-
-    if (isBufferType(type)) {
-      return { type: 'string', format: 'binary', ...base }
-    }
-
-    if (
-      isObjectType(type) ||
-      (type.isIntersection() && type.types.every((part) => isObjectType(part)))
-    ) {
-      addComponent()
-      const props = ctx.checker.getPropertiesOfType(type)
-      return {
-        type: 'object',
-        required: props
-          .filter((prop) => !isOptional(prop))
-          .map((prop) => prop.name),
-        ...base,
-        properties: Object.fromEntries(
-          props
-            .map((prop) => {
-              const propType = ctx.checker.getTypeOfSymbolAtLocation(
-                prop,
-                ctx.location
-              )
-              if (!propType) {
-                ctx.log('warn', 'Could not get type for property', prop.name)
-                return
-              }
-              const propSchema = typeToSchema(ctx, components, propType, {
-                propSymbol: prop,
-                optional: isOptional(prop),
-              })
-              if (!propSchema) {
-                ctx.log('warn', 'Could not get schema for property', prop.name)
-                return
-              }
-              return [prop.name, propSchema]
-            })
-            .filter(isDefined)
-        ),
-      }
-    }
-
-    if (isStringType(type)) {
-      return { type: 'string', ...base }
-    }
-    if (isNumberType(type)) {
-      return { type: 'number', ...base }
-    }
-    if (isBooleanType(type)) {
-      return { type: 'boolean', ...base }
-    }
-    if (isStringLiteralType(type)) {
-      return { type: 'string', enum: [type.value], ...base }
-    }
-    if (isNumberLiteralType(type)) {
-      return { type: 'number', enum: [type.value], ...base }
-    }
-
-    const branded = getBrandedType(ctx, type)
-    if (branded) {
-      // io-ts branded type
-      const { brandName, brandedType } = branded
-
-      if (brandName === 'Brand<IntBrand>') {
-        // io-ts Int
-        return { type: 'integer', ...base }
+        // other branded type
+        return typeToSchema(ctx, components, brandedType, options)
       }
 
-      // other branded type
-      return typeToSchema(ctx, components, brandedType, options)
+      ctx.log(
+        'warn',
+        `Ignoring an unknown type: ${ctx.checker.typeToString(type)}`
+      )
+      return
     }
-
-    ctx.log(
-      'warn',
-      `Ignoring an unknown type: ${ctx.checker.typeToString(type)}`
-    )
-    return
-  })
+  )
