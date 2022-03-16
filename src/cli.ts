@@ -1,11 +1,9 @@
-#!/usr/bin/env node
 import * as fs from 'fs'
 import * as path from 'path'
-import { OpenAPIV3 } from 'openapi-types'
 import * as ts from 'typescript'
 import * as yargs from 'yargs'
 
-import { generate } from '.'
+import { GenerateResult, generate } from '.'
 import { Logger } from './context'
 import { runPrettier } from './prettify'
 
@@ -22,10 +20,15 @@ const parseArgs = () =>
       type: 'boolean',
       default: false,
     })
-    .option('format', {
-      description: 'Output file format',
-      choices: ['ts' as const, 'json' as const],
-      default: 'ts' as Format,
+    .option('outfile', {
+      alias: 'o',
+      description: 'Output file. Must end in `.ts` or `.json`.',
+      default: 'openapi.ts',
+      coerce: (arg: string): [string, Format] => {
+        if (arg.endsWith('.ts')) return [arg, 'ts']
+        if (arg.endsWith('.json')) return [arg, 'json']
+        throw new Error('outfile must end in `.ts` or `.json`')
+      },
     })
     .option('tsconfig', {
       description: 'Which tsconfig.json to use',
@@ -33,26 +36,23 @@ const parseArgs = () =>
     })
     .option('prettify', {
       alias: 'p',
-      description: 'Apply prettier to output files',
+      description: 'Apply prettier to the output file',
       type: 'boolean',
       default: false,
     })
     .option('check', {
       alias: 'c',
       description:
-        'Exit with an error if output files are not up-to-date (useful for CI)',
+        'Exit with an error if the output file is not up-to-date (useful for CI)',
       type: 'boolean',
       default: false,
     }).argv
 
-const outputFileName = (sourceFileName: string, ext: string): string =>
-  sourceFileName.slice(0, -path.extname(sourceFileName).length) + ext
-
-const main = async () => {
+const main = async (): Promise<number> => {
   const args = parseArgs()
 
   const sourceFiles = args._.map((x) => path.resolve(x.toString()))
-  const ext = `.openapi.${args.format}`
+  const [outfile, format] = args.outfile
 
   const compilerOptions = readCompilerOptions(args.tsconfig)
   if (!compilerOptions) process.exit(1)
@@ -61,32 +61,18 @@ const main = async () => {
     console.log(`Compiler options: ${JSON.stringify(compilerOptions, null, 2)}`)
   }
 
-  const results = generate(sourceFiles, compilerOptions, {
-    log,
-  }).map((result) => ({
-    ...result,
-    outputFileName: outputFileName(result.fileName, ext),
-  }))
-
-  let success = true
-  for (const { outputFileName, paths, components } of results) {
-    let content =
-      args.format === 'ts'
-        ? tsString(paths, components)
-        : jsonString(paths, components)
-    if (args.prettify) {
-      content = await runPrettier(outputFileName, content)
-    }
-    if (args.check) {
-      if (!checkOutput(outputFileName, content)) success = false
-    } else {
-      writeOutput(outputFileName, content)
-    }
+  const result = generate(sourceFiles, compilerOptions, { log })
+  let content = format === 'ts' ? tsString(result) : jsonString(result)
+  if (args.prettify) {
+    content = await runPrettier(outfile, content)
+  }
+  if (args.check) {
+    if (!checkOutput(outfile, content)) return 1
+  } else {
+    writeOutput(outfile, content)
   }
 
-  if (!success) {
-    process.exit(1)
-  }
+  return 0
 }
 
 const readCompilerOptions = (
@@ -136,22 +122,18 @@ const writeOutput = (fileName: string, content: string): void => {
   fs.writeFileSync(fileName, content)
 }
 
-const tsString = (
-  paths: OpenAPIV3.PathsObject,
-  components: OpenAPIV3.ComponentsObject
-): string => `\
+const tsString = (result: GenerateResult): string => `\
 import { OpenAPIV3 } from 'openapi-types'
 
 const spec: { paths: OpenAPIV3.PathsObject, components: OpenAPIV3.ComponentsObject } = ${JSON.stringify(
-  { paths, components }
+  result
 )};
 
 export default spec;
 `
 
-const jsonString = (
-  paths: OpenAPIV3.PathsObject,
-  components: OpenAPIV3.ComponentsObject
-): string => JSON.stringify({ paths, components })
+const jsonString = (result: GenerateResult): string => JSON.stringify(result)
 
-main()
+main().then((status) => {
+  if (status !== 0) process.exit(status)
+})

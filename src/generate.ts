@@ -27,8 +27,7 @@ interface GenerateOptions {
   log: Logger
 }
 
-interface Result {
-  fileName: string
+export interface GenerateResult {
   paths: OpenAPIV3.PathsObject
   components: OpenAPIV3.ComponentsObject
 }
@@ -37,35 +36,32 @@ export const generate = (
   fileNames: string[],
   compilerOptions: ts.CompilerOptions,
   options?: GenerateOptions
-): Result[] => {
+): GenerateResult => {
   const log = options?.log || (() => undefined)
   const program = ts.createProgram(fileNames, compilerOptions)
   const checker = program.getTypeChecker()
 
-  const result: Result[] = []
+  const components = new Components()
+  let paths: OpenAPIV3.PathsObject = {}
 
   for (const sourceFile of program.getSourceFiles()) {
     if (!fileNames.includes(sourceFile.fileName)) continue
     if (sourceFile.isDeclarationFile) continue
 
     ts.forEachChild(sourceFile, (node) => {
-      const components = new Components()
-      const paths = visitTopLevelNode(
+      const newPaths = visitTopLevelNode(
         context(checker, sourceFile, log, node),
         components,
         node
       )
-      if (paths) {
-        result.push({
-          fileName: sourceFile.fileName,
-          paths,
-          components: components.build(),
-        })
+      if (newPaths) {
+        // TODO: What if a route is defined multiple times?
+        paths = { ...paths, ...newPaths }
       }
     })
   }
 
-  return result
+  return { paths, components: components.build() }
 }
 
 const visitTopLevelNode = (

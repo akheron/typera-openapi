@@ -11,230 +11,485 @@ Array [
 `;
 
 exports[`generate works 1`] = `
-Array [
-  Object {
-    "components": Object {
-      "schemas": Object {
-        "DirectRecursiveIntersection": Object {
-          "properties": Object {
-            "children": Object {
-              "$ref": "#/components/schemas/DirectRecursiveIntersection",
-            },
-            "id": Object {
-              "type": "string",
-            },
+Object {
+  "components": Object {
+    "schemas": Object {
+      "DirectRecursiveIntersection": Object {
+        "properties": Object {
+          "children": Object {
+            "$ref": "#/components/schemas/DirectRecursiveIntersection",
           },
-          "required": Array [
-            "id",
-            "children",
-          ],
-          "type": "object",
-        },
-        "DirectRecursiveType": Object {
-          "properties": Object {
-            "children": Object {
-              "items": Object {
-                "$ref": "#/components/schemas/DirectRecursiveType",
-              },
-              "type": "array",
-            },
-            "id": Object {
-              "type": "string",
-            },
+          "id": Object {
+            "type": "string",
           },
-          "required": Array [
-            "id",
-            "children",
-          ],
-          "type": "object",
         },
-        "DocumentedInterface": Object {
-          "properties": Object {
-            "outputField": Object {
-              "description": "Output field description here",
-              "type": "string",
-            },
-          },
-          "required": Array [
-            "outputField",
-          ],
-          "type": "object",
-        },
-        "IndirectRecursiveType": Object {
-          "properties": Object {
-            "hello": Object {
-              "type": "string",
-            },
+        "required": Array [
+          "id",
+          "children",
+        ],
+        "type": "object",
+      },
+      "DirectRecursiveType": Object {
+        "properties": Object {
+          "children": Object {
             "items": Object {
-              "items": Object {
-                "$ref": "#/components/schemas/MutuallyRecursive",
+              "$ref": "#/components/schemas/DirectRecursiveType",
+            },
+            "type": "array",
+          },
+          "id": Object {
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "id",
+          "children",
+        ],
+        "type": "object",
+      },
+      "DocumentedInterface": Object {
+        "properties": Object {
+          "outputField": Object {
+            "description": "Output field description here",
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "outputField",
+        ],
+        "type": "object",
+      },
+      "IndirectRecursiveType": Object {
+        "properties": Object {
+          "hello": Object {
+            "type": "string",
+          },
+          "items": Object {
+            "items": Object {
+              "$ref": "#/components/schemas/MutuallyRecursive",
+            },
+            "type": "array",
+          },
+        },
+        "required": Array [
+          "hello",
+          "items",
+        ],
+        "type": "object",
+      },
+      "MutuallyRecursive": Object {
+        "properties": Object {
+          "other": Object {
+            "$ref": "#/components/schemas/IndirectRecursiveType",
+          },
+        },
+        "required": Array [
+          "other",
+        ],
+        "type": "object",
+      },
+      "User": Object {
+        "properties": Object {
+          "petName": Object {
+            "nullable": true,
+            "type": "string",
+          },
+          "shoeSize": Object {
+            "type": "number",
+          },
+          "updated": Object {
+            "format": "date-time",
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "shoeSize",
+          "petName",
+          "updated",
+        ],
+        "type": "object",
+      },
+      "User2": Object {
+        "properties": Object {
+          "name": Object {
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "name",
+        ],
+        "type": "object",
+      },
+    },
+  },
+  "paths": Object {
+    "/binary-response": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/octet-stream": Object {
+                "schema": Object {
+                  "format": "binary",
+                  "type": "string",
+                },
               },
-              "type": "array",
             },
+            "description": "OK",
           },
-          "required": Array [
-            "hello",
-            "items",
-          ],
-          "type": "object",
-        },
-        "MutuallyRecursive": Object {
-          "properties": Object {
-            "other": Object {
-              "$ref": "#/components/schemas/IndirectRecursiveType",
-            },
-          },
-          "required": Array [
-            "other",
-          ],
-          "type": "object",
-        },
-        "User": Object {
-          "properties": Object {
-            "petName": Object {
-              "nullable": true,
-              "type": "string",
-            },
-            "shoeSize": Object {
-              "type": "number",
-            },
-            "updated": Object {
-              "format": "date-time",
-              "type": "string",
-            },
-          },
-          "required": Array [
-            "shoeSize",
-            "petName",
-            "updated",
-          ],
-          "type": "object",
-        },
-        "User2": Object {
-          "properties": Object {
-            "name": Object {
-              "type": "string",
-            },
-          },
-          "required": Array [
-            "name",
-          ],
-          "type": "object",
         },
       },
     },
-    "fileName": "tests/test-routes.ts",
-    "paths": Object {
-      "/binary-response": Object {
-        "get": Object {
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "application/octet-stream": Object {
-                  "schema": Object {
-                    "format": "binary",
+    "/branded-request-body": Object {
+      "post": Object {
+        "requestBody": Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "properties": Object {
+                  "int": Object {
+                    "type": "integer",
+                  },
+                  "nonEmptyString": Object {
                     "type": "string",
                   },
                 },
+                "required": Array [
+                  "int",
+                  "nonEmptyString",
+                ],
+                "type": "object",
               },
-              "description": "OK",
             },
           },
         },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "number",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
       },
-      "/branded-request-body": Object {
-        "post": Object {
-          "requestBody": Object {
+    },
+    "/constant": Object {
+      "get": Object {
+        "description": "No input, static output, has a tag",
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "Successful result",
+          },
+        },
+        "summary": "This is a summary",
+        "tags": Array [
+          "Tag",
+        ],
+      },
+    },
+    "/cookies": Object {
+      "get": Object {
+        "parameters": Array [
+          Object {
+            "in": "cookie",
+            "name": "foo",
+            "required": true,
+          },
+          Object {
+            "in": "cookie",
+            "name": "bar",
+            "required": false,
+          },
+        ],
+        "responses": Object {
+          "200": Object {
             "content": Object {
               "application/json": Object {
                 "schema": Object {
                   "properties": Object {
-                    "int": Object {
-                      "type": "integer",
+                    "bar": Object {
+                      "type": "number",
                     },
-                    "nonEmptyString": Object {
+                    "foo": Object {
                       "type": "string",
                     },
                   },
                   "required": Array [
-                    "int",
-                    "nonEmptyString",
+                    "foo",
                   ],
                   "type": "object",
                 },
               },
             },
+            "description": "OK",
           },
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
+          "400": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
+      },
+    },
+    "/direct-route-call": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
+    "/handler-not-inline": Object {
+      "post": Object {
+        "requestBody": Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "properties": Object {
+                  "foo": Object {
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "foo",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
+      },
+    },
+    "/interface-array-response": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "items": Object {
+                    "$ref": "#/components/schemas/User",
+                  },
+                  "type": "array",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
+    "/interface-response": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "$ref": "#/components/schemas/User",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
+    "/no-explicit-route-type": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
+    "/other-file-default-export": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
+    "/other-file-export": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "$ref": "#/components/schemas/User2",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
+    "/other-route": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
+    "/query": Object {
+      "get": Object {
+        "parameters": Array [
+          Object {
+            "in": "query",
+            "name": "str",
+            "required": true,
+          },
+          Object {
+            "in": "query",
+            "name": "num",
+            "required": false,
+          },
+        ],
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
+      },
+    },
+    "/recursive-types": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "$ref": "#/components/schemas/IndirectRecursiveType",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
+    "/request-body": Object {
+      "post": Object {
+        "description": "This one has request body and two possible successful responses and multiple tags",
+        "requestBody": Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "properties": Object {
+                  "date": Object {
+                    "format": "date-time",
+                    "type": "string",
+                  },
+                  "nullableNum": Object {
+                    "nullable": true,
                     "type": "number",
                   },
-                },
-              },
-              "description": "OK",
-            },
-            "400": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "Bad Request",
-            },
-          },
-        },
-      },
-      "/constant": Object {
-        "get": Object {
-          "description": "No input, static output, has a tag",
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "Successful result",
-            },
-          },
-          "summary": "This is a summary",
-          "tags": Array [
-            "Tag",
-          ],
-        },
-      },
-      "/cookies": Object {
-        "get": Object {
-          "parameters": Array [
-            Object {
-              "in": "cookie",
-              "name": "foo",
-              "required": true,
-            },
-            Object {
-              "in": "cookie",
-              "name": "bar",
-              "required": false,
-            },
-          ],
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "application/json": Object {
-                  "schema": Object {
+                  "nullableObj": Object {
+                    "nullable": true,
                     "properties": Object {
-                      "bar": Object {
-                        "type": "number",
-                      },
                       "foo": Object {
-                        "type": "string",
+                        "type": "number",
                       },
                     },
                     "required": Array [
@@ -242,42 +497,158 @@ Array [
                     ],
                     "type": "object",
                   },
-                },
-              },
-              "description": "OK",
-            },
-            "400": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
+                  "numLit": Object {
+                    "enum": Array [
+                      42,
+                    ],
+                    "type": "number",
+                  },
+                  "numLits": Object {
+                    "enum": Array [
+                      42,
+                      123,
+                    ],
+                    "type": "number",
+                  },
+                  "optionalBool": Object {
+                    "type": "boolean",
+                  },
+                  "requiredBool": Object {
+                    "type": "boolean",
+                  },
+                  "str": Object {
+                    "type": "string",
+                  },
+                  "strLit": Object {
+                    "enum": Array [
+                      "foo",
+                    ],
+                    "type": "string",
+                  },
+                  "strLits": Object {
+                    "enum": Array [
+                      "foo",
+                      "bar",
+                    ],
                     "type": "string",
                   },
                 },
+                "required": Array [
+                  "str",
+                  "requiredBool",
+                  "nullableNum",
+                  "nullableObj",
+                  "numLit",
+                  "numLits",
+                  "strLit",
+                  "strLits",
+                  "date",
+                ],
+                "type": "object",
               },
-              "description": "Bad Request",
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "Successful result",
+          },
+          "201": Object {
+            "description": "A new resource was created",
+          },
+          "400": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "Validation error",
+          },
+        },
+        "tags": Array [
+          "Tag1",
+          "Tag2",
+          "Tag3",
+          "Tag4",
+          "Tag5",
+        ],
+      },
+    },
+    "/request-headers": Object {
+      "get": Object {
+        "parameters": Array [
+          Object {
+            "in": "header",
+            "name": "API-KEY",
+            "required": true,
+          },
+          Object {
+            "in": "header",
+            "name": "X-Forwarded-For",
+            "required": false,
+          },
+        ],
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
+      },
+    },
+    "/response-headers": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "OK",
+            "headers": Object {
+              "X-Bar": Object {
+                "required": false,
+              },
+              "X-Foo": Object {
+                "required": true,
+              },
             },
           },
         },
       },
-      "/direct-route-call": Object {
-        "get": Object {
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-          },
-        },
-      },
-      "/handler-not-inline": Object {
-        "post": Object {
-          "requestBody": Object {
+    },
+    "/same-path-route": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
             "content": Object {
               "application/json": Object {
                 "schema": Object {
@@ -293,584 +664,226 @@ Array [
                 },
               },
             },
-          },
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-            "400": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "Bad Request",
-            },
+            "description": "OK",
           },
         },
       },
-      "/interface-array-response": Object {
-        "get": Object {
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "application/json": Object {
-                  "schema": Object {
-                    "items": Object {
-                      "$ref": "#/components/schemas/User",
-                    },
-                    "type": "array",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-          },
-        },
-      },
-      "/interface-response": Object {
-        "get": Object {
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "application/json": Object {
-                  "schema": Object {
-                    "$ref": "#/components/schemas/User",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-          },
-        },
-      },
-      "/no-explicit-route-type": Object {
-        "get": Object {
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-          },
-        },
-      },
-      "/other-file-default-export": Object {
-        "get": Object {
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-          },
-        },
-      },
-      "/other-file-export": Object {
-        "get": Object {
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "application/json": Object {
-                  "schema": Object {
-                    "$ref": "#/components/schemas/User2",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-          },
-        },
-      },
-      "/query": Object {
-        "get": Object {
-          "parameters": Array [
-            Object {
-              "in": "query",
-              "name": "str",
-              "required": true,
-            },
-            Object {
-              "in": "query",
-              "name": "num",
-              "required": false,
-            },
-          ],
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-            "400": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "Bad Request",
-            },
-          },
-        },
-      },
-      "/recursive-types": Object {
-        "get": Object {
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "application/json": Object {
-                  "schema": Object {
-                    "$ref": "#/components/schemas/IndirectRecursiveType",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-          },
-        },
-      },
-      "/request-body": Object {
-        "post": Object {
-          "description": "This one has request body and two possible successful responses and multiple tags",
-          "requestBody": Object {
+      "post": Object {
+        "responses": Object {
+          "200": Object {
             "content": Object {
               "application/json": Object {
                 "schema": Object {
                   "properties": Object {
-                    "date": Object {
-                      "format": "date-time",
-                      "type": "string",
-                    },
-                    "nullableNum": Object {
-                      "nullable": true,
+                    "bar": Object {
                       "type": "number",
-                    },
-                    "nullableObj": Object {
-                      "nullable": true,
-                      "properties": Object {
-                        "foo": Object {
-                          "type": "number",
-                        },
-                      },
-                      "required": Array [
-                        "foo",
-                      ],
-                      "type": "object",
-                    },
-                    "numLit": Object {
-                      "enum": Array [
-                        42,
-                      ],
-                      "type": "number",
-                    },
-                    "numLits": Object {
-                      "enum": Array [
-                        42,
-                        123,
-                      ],
-                      "type": "number",
-                    },
-                    "optionalBool": Object {
-                      "type": "boolean",
-                    },
-                    "requiredBool": Object {
-                      "type": "boolean",
-                    },
-                    "str": Object {
-                      "type": "string",
-                    },
-                    "strLit": Object {
-                      "enum": Array [
-                        "foo",
-                      ],
-                      "type": "string",
-                    },
-                    "strLits": Object {
-                      "enum": Array [
-                        "foo",
-                        "bar",
-                      ],
-                      "type": "string",
                     },
                   },
                   "required": Array [
-                    "str",
-                    "requiredBool",
-                    "nullableNum",
-                    "nullableObj",
-                    "numLit",
-                    "numLits",
-                    "strLit",
-                    "strLits",
-                    "date",
+                    "bar",
                   ],
                   "type": "object",
                 },
               },
             },
-          },
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "Successful result",
-            },
-            "201": Object {
-              "description": "A new resource was created",
-            },
-            "400": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "Validation error",
-            },
-          },
-          "tags": Array [
-            "Tag1",
-            "Tag2",
-            "Tag3",
-            "Tag4",
-            "Tag5",
-          ],
-        },
-      },
-      "/request-headers": Object {
-        "get": Object {
-          "parameters": Array [
-            Object {
-              "in": "header",
-              "name": "API-KEY",
-              "required": true,
-            },
-            Object {
-              "in": "header",
-              "name": "X-Forwarded-For",
-              "required": false,
-            },
-          ],
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-            "400": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "Bad Request",
-            },
+            "description": "OK",
           },
         },
       },
-      "/response-headers": Object {
-        "get": Object {
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
+    },
+    "/schema-docstrings": Object {
+      "get": Object {
+        "parameters": Array [
+          Object {
+            "description": "Foo bar baz",
+            "in": "query",
+            "name": "param",
+            "required": true,
+          },
+        ],
+        "requestBody": Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "properties": Object {
+                  "inputField": Object {
+                    "description": "Input field description",
+                    "type": "number",
                   },
                 },
+                "required": Array [
+                  "inputField",
+                ],
+                "type": "object",
               },
-              "description": "OK",
-              "headers": Object {
-                "X-Bar": Object {
-                  "required": false,
-                },
-                "X-Foo": Object {
-                  "required": true,
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "$ref": "#/components/schemas/DocumentedInterface",
                 },
               },
             },
+            "description": "OK",
+          },
+          "400": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "Bad Request",
           },
         },
       },
-      "/same-path-route": Object {
-        "get": Object {
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "application/json": Object {
-                  "schema": Object {
-                    "properties": Object {
-                      "foo": Object {
-                        "type": "string",
-                      },
-                    },
-                    "required": Array [
-                      "foo",
-                    ],
-                    "type": "object",
-                  },
+    },
+    "/type-alias": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
                 },
               },
-              "description": "OK",
             },
+            "description": "OK",
           },
-        },
-        "post": Object {
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "application/json": Object {
-                  "schema": Object {
-                    "properties": Object {
-                      "bar": Object {
-                        "type": "number",
-                      },
-                    },
-                    "required": Array [
-                      "bar",
-                    ],
-                    "type": "object",
-                  },
+          "400": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
                 },
               },
-              "description": "OK",
             },
+            "description": "Bad Request",
           },
         },
       },
-      "/schema-docstrings": Object {
-        "get": Object {
-          "parameters": Array [
-            Object {
-              "description": "Foo bar baz",
-              "in": "query",
-              "name": "param",
-              "required": true,
+    },
+    "/unused-request": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
             },
-          ],
-          "requestBody": Object {
+            "description": "OK",
+          },
+        },
+      },
+    },
+    "/user/{id}/{other}": Object {
+      "get": Object {
+        "parameters": Array [
+          Object {
+            "in": "path",
+            "name": "id",
+            "required": true,
+          },
+          Object {
+            "in": "path",
+            "name": "other",
+            "required": true,
+          },
+        ],
+        "responses": Object {
+          "200": Object {
             "content": Object {
               "application/json": Object {
                 "schema": Object {
                   "properties": Object {
-                    "inputField": Object {
-                      "description": "Input field description",
+                    "id": Object {
                       "type": "number",
                     },
-                  },
-                  "required": Array [
-                    "inputField",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-          },
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "application/json": Object {
-                  "schema": Object {
-                    "$ref": "#/components/schemas/DocumentedInterface",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-            "400": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "Bad Request",
-            },
-          },
-        },
-      },
-      "/type-alias": Object {
-        "get": Object {
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-            "400": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "Bad Request",
-            },
-          },
-        },
-      },
-      "/unused-request": Object {
-        "get": Object {
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-          },
-        },
-      },
-      "/user/{id}/{other}": Object {
-        "get": Object {
-          "parameters": Array [
-            Object {
-              "in": "path",
-              "name": "id",
-              "required": true,
-            },
-            Object {
-              "in": "path",
-              "name": "other",
-              "required": true,
-            },
-          ],
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "application/json": Object {
-                  "schema": Object {
-                    "properties": Object {
-                      "id": Object {
-                        "type": "number",
-                      },
-                      "other": Object {
-                        "type": "string",
-                      },
-                    },
-                    "required": Array [
-                      "id",
-                      "other",
-                    ],
-                    "type": "object",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-          },
-        },
-      },
-      "/uses-custom-route": Object {
-        "get": Object {
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
-                },
-              },
-              "description": "OK",
-            },
-          },
-        },
-      },
-      "/with-content-type-middleware": Object {
-        "post": Object {
-          "requestBody": Object {
-            "content": Object {
-              "application/x-www-form-urlencoded": Object {
-                "schema": Object {
-                  "properties": Object {
-                    "a": Object {
+                    "other": Object {
                       "type": "string",
                     },
                   },
                   "required": Array [
-                    "a",
+                    "id",
+                    "other",
                   ],
                   "type": "object",
                 },
               },
             },
+            "description": "OK",
           },
-          "responses": Object {
-            "200": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
+        },
+      },
+    },
+    "/uses-custom-route": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
+    "/with-content-type-middleware": Object {
+      "post": Object {
+        "requestBody": Object {
+          "content": Object {
+            "application/x-www-form-urlencoded": Object {
+              "schema": Object {
+                "properties": Object {
+                  "a": Object {
                     "type": "string",
                   },
                 },
+                "required": Array [
+                  "a",
+                ],
+                "type": "object",
               },
-              "description": "OK",
             },
-            "400": Object {
-              "content": Object {
-                "text/plain": Object {
-                  "schema": Object {
-                    "type": "string",
-                  },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
                 },
               },
-              "description": "Bad Request",
             },
+            "description": "OK",
+          },
+          "400": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "Bad Request",
           },
         },
       },
     },
   },
-]
+}
 `;

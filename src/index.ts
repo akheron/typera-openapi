@@ -1,4 +1,4 @@
-export { generate } from './generate'
+export { GenerateResult, generate } from './generate'
 export { LogLevel } from './context'
 import { OpenAPIV3 } from 'openapi-types'
 
