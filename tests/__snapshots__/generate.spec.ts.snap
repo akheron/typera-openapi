@@ -399,7 +399,7 @@ Object {
         },
       },
     },
-    "/other-route": Object {
+    "/other-stuff/other-route": Object {
       "get": Object {
         "responses": Object {
           "200": Object {

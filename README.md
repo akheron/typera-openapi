@@ -62,7 +62,12 @@ const myRoute: Route<Response.Ok<MyResult> | Response.BadRequest<string>> =
 
 // ...
 
+/**
+ * @prefix /api
+ */
 export default router(myRoute, ...)
+
+// The optional @prefix JSDoc tag prepends the prefix to all route paths.
 ```
 
 Run the `typera-openapi` tool giving paths to your route files as command line
