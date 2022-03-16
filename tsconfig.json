@@ -1,13 +1,10 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
+    "noEmit": true,
     "module": "commonjs",
     "target": "es6",
     "lib": ["es2019"],
     "skipLibCheck": true,
-    "strict": true,
-    "declaration": true
-  },
-  "include": ["src/*.ts"],
-  "exclude": []
+    "strict": true
+  }
 }
