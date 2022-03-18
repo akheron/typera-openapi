@@ -10,8 +10,11 @@ const warningRoutes = relativePath('warning-routes.ts')
 
 describe('generate', () => {
   it('works', () => {
-    const result = generate([testRoutes, otherRoutes], { strict: true })
-    expect(result).toMatchSnapshot()
+    const { output, unseenFileNames } = generate([testRoutes, otherRoutes], {
+      strict: true,
+    })
+    expect(output).toMatchSnapshot()
+    expect(unseenFileNames).toEqual([])
   })
 
   it('warnings', () => {
