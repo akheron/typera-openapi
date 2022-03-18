@@ -1,2 +1,2 @@
-export { GenerateResult, generate } from './generate'
+export { GenerateResult, GenerateOutput, generate } from './generate'
 export { LogLevel } from './context'

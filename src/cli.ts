@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as ts from 'typescript'
 import * as yargs from 'yargs'
 
-import { GenerateResult, generate } from '.'
+import { GenerateOutput, generate } from '.'
 import { Logger } from './context'
 import { runPrettier } from './prettify'
 
@@ -51,7 +51,11 @@ const parseArgs = () =>
 const main = async (): Promise<number> => {
   const args = parseArgs()
 
-  const sourceFiles = args._.map((x) => path.resolve(x.toString()))
+  const sourceFiles = args._.map((x) => x.toString())
+  if (sourceFiles.length === 0) {
+    console.error('error: No source files given')
+    return 1
+  }
   const [outfile, format] = args.outfile
 
   const compilerOptions = readCompilerOptions(args.tsconfig)
@@ -61,8 +65,19 @@ const main = async (): Promise<number> => {
     console.log(`Compiler options: ${JSON.stringify(compilerOptions, null, 2)}`)
   }
 
-  const result = generate(sourceFiles, compilerOptions, { log })
-  let content = format === 'ts' ? tsString(result) : jsonString(result)
+  const { output, unseenFileNames } = generate(sourceFiles, compilerOptions, {
+    log,
+  })
+  if (unseenFileNames.length > 0) {
+    console.error(
+      `error: The following files don't exist or didn't contain any routes: ${unseenFileNames.join(
+        ', '
+      )}`
+    )
+    return 1
+  }
+
+  let content = format === 'ts' ? tsString(output) : jsonString(output)
   if (args.prettify) {
     content = await runPrettier(outfile, content)
   }
@@ -122,7 +137,7 @@ const writeOutput = (fileName: string, content: string): void => {
   fs.writeFileSync(fileName, content)
 }
 
-const tsString = (result: GenerateResult): string => `\
+const tsString = (result: GenerateOutput): string => `\
 import { OpenAPIV3 } from 'openapi-types'
 
 const spec: { paths: OpenAPIV3.PathsObject, components: OpenAPIV3.ComponentsObject } = ${JSON.stringify(
@@ -132,7 +147,7 @@ const spec: { paths: OpenAPIV3.PathsObject, components: OpenAPIV3.ComponentsObje
 export default spec;
 `
 
-const jsonString = (result: GenerateResult): string => JSON.stringify(result)
+const jsonString = (result: GenerateOutput): string => JSON.stringify(result)
 
 main().then((status) => {
   if (status !== 0) process.exit(status)

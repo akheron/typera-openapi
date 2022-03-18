@@ -1,3 +1,4 @@
+import * as path from 'path'
 import * as ts from 'typescript'
 import { OpenAPIV3 } from 'openapi-types'
 import * as statuses from 'statuses'
@@ -27,9 +28,14 @@ interface GenerateOptions {
   log: Logger
 }
 
-export interface GenerateResult {
+export interface GenerateOutput {
   paths: OpenAPIV3.PathsObject
   components: OpenAPIV3.ComponentsObject
+}
+
+export interface GenerateResult {
+  output: GenerateOutput
+  unseenFileNames: string[]
 }
 
 export const generate = (
@@ -41,13 +47,20 @@ export const generate = (
   const program = ts.createProgram(fileNames, compilerOptions)
   const checker = program.getTypeChecker()
 
+  const seenFileNames = new Set<string>()
+
   const components = new Components()
   let paths: OpenAPIV3.PathsObject = {}
 
   for (const sourceFile of program.getSourceFiles()) {
-    if (!fileNames.includes(sourceFile.fileName)) continue
     if (sourceFile.isDeclarationFile) continue
 
+    const foundFile = fileNames.find((fileName) =>
+      isSameFile(fileName, sourceFile.fileName)
+    )
+    if (foundFile === undefined) continue
+
+    let containsRoutes = false
     ts.forEachChild(sourceFile, (node) => {
       const newPaths = visitTopLevelNode(
         context(checker, sourceFile, log, node),
@@ -57,12 +70,23 @@ export const generate = (
       if (newPaths) {
         // TODO: What if a route is defined multiple times?
         paths = { ...paths, ...newPaths }
+        containsRoutes = true
       }
     })
+    if (containsRoutes) {
+      seenFileNames.add(foundFile)
+    }
   }
 
-  return { paths, components: components.build() }
+  return {
+    output: { paths, components: components.build() },
+    unseenFileNames: fileNames.filter(
+      (fileName) => !seenFileNames.has(fileName)
+    ),
+  }
 }
+
+const isSameFile = (a: string, b: string) => path.resolve(a) === path.resolve(b)
 
 const visitTopLevelNode = (
   ctx: Context,
