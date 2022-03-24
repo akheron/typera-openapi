@@ -29,6 +29,7 @@
     "yargs": "^17.0.0"
   },
   "devDependencies": {
+    "@apidevtools/swagger-parser": "^10.0.3",
     "@types/jest": "^27.0.1",
     "@types/node": "*",
     "@types/statuses": "^2.0.0",

@@ -195,10 +195,10 @@ const getRouteDeclaration = (
       : undefined
 
   const parameters = [
-    ...typeToParameters(ctx, 'path', routeParams),
-    ...typeToParameters(ctx, 'query', query),
-    ...typeToParameters(ctx, 'header', headers),
-    ...typeToParameters(ctx, 'cookie', cookies),
+    ...typeToRequestParameters(ctx, 'path', routeParams),
+    ...typeToRequestParameters(ctx, 'query', query),
+    ...typeToRequestParameters(ctx, 'header', headers),
+    ...typeToRequestParameters(ctx, 'cookie', cookies),
   ]
 
   const pathTemplate = path.replace(/:([^-.()/]+)(\(.*?\))?/g, '{$1}')
@@ -568,7 +568,7 @@ const getResponseDefinition = (
   }
 
   const headers = !isUndefinedType(headersType)
-    ? typeToHeaders(ctx, headersType)
+    ? typeToResponseHeaders(ctx, headersType)
     : undefined
 
   let description = responseDescriptions[status]
@@ -603,7 +603,7 @@ const getResponseDefinition = (
   }
 }
 
-const typeToParameters = (
+const typeToRequestParameters = (
   ctx: Context,
   in_: 'path' | 'query' | 'header' | 'cookie',
   type: ts.Type | undefined
@@ -617,6 +617,7 @@ const typeToParameters = (
       name: prop.name,
       in: in_,
       required: in_ === 'path' ? true : !isOptional(prop),
+      schema: { type: 'string' },
       ...(description ? { description } : undefined),
     }
   })
@@ -626,11 +627,12 @@ interface Headers {
   [header: string]: OpenAPIV3.HeaderObject
 }
 
-const typeToHeaders = (ctx: Context, type: ts.Type): Headers => {
+const typeToResponseHeaders = (ctx: Context, type: ts.Type): Headers => {
   const result: Headers = {}
   const props = ctx.checker.getPropertiesOfType(type)
   props.forEach((prop) => {
     result[prop.name] = {
+      schema: { type: 'string' },
       required: !isOptional(prop),
     }
   })
