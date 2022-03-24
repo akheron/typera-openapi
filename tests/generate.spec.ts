@@ -1,4 +1,5 @@
 import * as path from 'path'
+import * as SwaggerParser from '@apidevtools/swagger-parser'
 import { LogLevel, generate } from '../src/index'
 
 const relativePath = (fileName: string): string =>
@@ -9,10 +10,24 @@ const otherRoutes = relativePath('other-routes.ts')
 const warningRoutes = relativePath('warning-routes.ts')
 
 describe('generate', () => {
-  it('works', () => {
+  it('works', async () => {
     const { output, unseenFileNames } = generate([testRoutes, otherRoutes], {
       strict: true,
     })
+
+    // - Throws if output is invalid
+    // - Mutates the input if passed as an object (!), so round-trip through JSON first
+    await SwaggerParser.validate(
+      JSON.parse(
+        JSON.stringify({
+          openapi: '3.0.0',
+          info: { title: 'test', version: '1' },
+          ...output,
+        })
+      ),
+      { resolve: { external: false } }
+    )
+
     expect(output).toMatchSnapshot()
     expect(unseenFileNames).toEqual([])
   })

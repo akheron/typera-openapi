@@ -215,11 +215,17 @@ Object {
             "in": "cookie",
             "name": "foo",
             "required": true,
+            "schema": Object {
+              "type": "string",
+            },
           },
           Object {
             "in": "cookie",
             "name": "bar",
             "required": false,
+            "schema": Object {
+              "type": "string",
+            },
           },
         ],
         "responses": Object {
@@ -422,11 +428,17 @@ Object {
             "in": "query",
             "name": "str",
             "required": true,
+            "schema": Object {
+              "type": "string",
+            },
           },
           Object {
             "in": "query",
             "name": "num",
             "required": false,
+            "schema": Object {
+              "type": "string",
+            },
           },
         ],
         "responses": Object {
@@ -590,11 +602,17 @@ Object {
             "in": "header",
             "name": "API-KEY",
             "required": true,
+            "schema": Object {
+              "type": "string",
+            },
           },
           Object {
             "in": "header",
             "name": "X-Forwarded-For",
             "required": false,
+            "schema": Object {
+              "type": "string",
+            },
           },
         ],
         "responses": Object {
@@ -636,9 +654,15 @@ Object {
             "headers": Object {
               "X-Bar": Object {
                 "required": false,
+                "schema": Object {
+                  "type": "string",
+                },
               },
               "X-Foo": Object {
                 "required": true,
+                "schema": Object {
+                  "type": "string",
+                },
               },
             },
           },
@@ -699,6 +723,9 @@ Object {
             "in": "query",
             "name": "param",
             "required": true,
+            "schema": Object {
+              "type": "string",
+            },
           },
         ],
         "requestBody": Object {
@@ -792,11 +819,17 @@ Object {
             "in": "path",
             "name": "id",
             "required": true,
+            "schema": Object {
+              "type": "string",
+            },
           },
           Object {
             "in": "path",
             "name": "other",
             "required": true,
+            "schema": Object {
+              "type": "string",
+            },
           },
         ],
         "responses": Object {
