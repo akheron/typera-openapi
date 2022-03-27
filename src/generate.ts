@@ -588,7 +588,9 @@ const getResponseDefinition = (
       ...(bodySchema
         ? {
             content: {
-              [getResponseContentType(bodyType)]: { schema: bodySchema },
+              [getResponseContentType(ctx, headersType, bodyType)]: {
+                schema: bodySchema,
+              },
             },
           }
         : undefined),
@@ -597,7 +599,14 @@ const getResponseDefinition = (
   }
 }
 
-const getResponseContentType = (bodyType: ts.Type) => {
+const getResponseContentType = (
+  ctx: Context,
+  headersType: ts.Type,
+  bodyType: ts.Type
+): string => {
+  const contentTypeHeader = getContentTypeHeader(ctx, headersType)
+  if (contentTypeHeader !== undefined) return contentTypeHeader
+
   if (
     isStringType(bodyType) ||
     isNumberType(bodyType) ||
@@ -611,6 +620,31 @@ const getResponseContentType = (bodyType: ts.Type) => {
   }
 
   return 'application/json'
+}
+
+const getContentTypeHeader = (
+  ctx: Context,
+  headersType: ts.Type
+): string | undefined => {
+  if (isUndefinedType(headersType) || !headersType.symbol.members) return
+
+  const members = headersType.symbol.members as Map<string, ts.Symbol>
+  for (const [name, symbol] of members) {
+    if (name.toLowerCase() !== 'content-type') continue
+
+    if (symbol.valueDeclaration) {
+      const t = ctx.checker.getTypeOfSymbolAtLocation(
+        symbol,
+        symbol.valueDeclaration
+      )
+      if (isStringLiteralType(t)) {
+        return t.value
+      }
+    }
+
+    // Content-Type found but it was not suitable, no point in searching further
+    break
+  }
 }
 
 const typeToRequestParameters = (
