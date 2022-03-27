@@ -35,15 +35,11 @@ export const isTypeAlias = (symbol: ts.Symbol): boolean =>
 
 // Check for a specific object type based on type name and property names
 const duckTypeChecker =
-  (name: string, properties: string[]) => (type: ts.Type) => {
-    const symbol = type.symbol
-    return (
-      isObjectType(type) &&
-      symbol.escapedName === name &&
-      // If it walks like a duck and it quacks like a duck, then it must be a duck
-      properties.every((name) => symbol.members?.has(name as ts.__String))
-    )
-  }
+  (name: string, properties: string[]) => (type: ts.Type) =>
+    isObjectType(type) &&
+    // If it walks like a duck and it quacks like a duck, then it must be a duck
+    (type.aliasSymbol?.name === name || type.getSymbol()?.name === name) &&
+    properties.every((name) => type.symbol.members?.has(name as ts.__String))
 
 export const isDateType = duckTypeChecker('Date', [
   'getTime',
@@ -59,6 +55,11 @@ export const isBufferType = duckTypeChecker('Buffer', [
   'fill',
   'readUInt8',
   'write',
+])
+
+export const isStreamingBodyType = duckTypeChecker('StreamingBody', [
+  '_kind',
+  'callback',
 ])
 
 export const getPropertyType = (

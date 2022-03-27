@@ -639,6 +639,72 @@ Object {
         },
       },
     },
+    "/response-body-boolean": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "boolean",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
+    "/response-body-buffer": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/octet-stream": Object {
+                "schema": Object {
+                  "format": "binary",
+                  "type": "string",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
+    "/response-body-number": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "number",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
+    "/response-body-streaming": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/octet-stream": Object {
+                "schema": Object {
+                  "format": "binary",
+                  "type": "string",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
     "/response-headers": Object {
       "get": Object {
         "responses": Object {

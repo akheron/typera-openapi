@@ -299,6 +299,30 @@ const recursiveTypes: Route<
   return Response.ok({ id: 'hell', children: [] })
 })
 
+const responseBodyNumber: Route<Response.Ok<number>> = route
+  .get('/response-body-number')
+  .handler(async () => {
+    return Response.ok(42)
+  })
+
+const responseBodyBoolean: Route<Response.Ok<boolean>> = route
+  .get('/response-body-boolean')
+  .handler(async () => {
+    return Response.ok(true)
+  })
+
+const responseBodyBuffer: Route<Response.Ok<Buffer>> = route
+  .get('/response-body-buffer')
+  .handler(async () => {
+    return Response.ok(Buffer.from('foo'))
+  })
+
+const responseBodyStreaming: Route<Response.Ok<Response.StreamingBody>> = route
+  .get('/response-body-streaming')
+  .handler(async () => {
+    return Response.ok(Response.streamingBody((stream) => stream.write(null)))
+  })
+
 export default router(
   constant,
   directRouteCall,
@@ -322,6 +346,10 @@ export default router(
   typeAlias,
   withContentTypeMiddleware,
   recursiveTypes,
+  responseBodyNumber,
+  responseBodyBoolean,
+  responseBodyBuffer,
+  responseBodyStreaming,
   otherFileExport, // export from another module
   otherFileDefaultExport // default export from another module
 )
