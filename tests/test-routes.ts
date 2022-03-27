@@ -323,6 +323,12 @@ const responseBodyStreaming: Route<Response.Ok<Response.StreamingBody>> = route
     return Response.ok(Response.streamingBody((stream) => stream.write(null)))
   })
 
+const customContentType: Route<
+  Response.Ok<string, { 'Content-Type': 'text/csv' }>
+> = route.get('/custom-content-type').handler(async () => {
+  return Response.ok('foo;bar;baz', { 'Content-Type': 'text/csv' })
+})
+
 export default router(
   constant,
   directRouteCall,
@@ -350,6 +356,7 @@ export default router(
   responseBodyBoolean,
   responseBodyBuffer,
   responseBodyStreaming,
+  customContentType,
   otherFileExport, // export from another module
   otherFileDefaultExport // default export from another module
 )

@@ -263,6 +263,30 @@ Object {
         },
       },
     },
+    "/custom-content-type": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/csv": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "OK",
+            "headers": Object {
+              "Content-Type": Object {
+                "required": true,
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     "/direct-route-call": Object {
       "get": Object {
         "responses": Object {
