@@ -21,6 +21,7 @@ import {
   isBufferType,
   getBrandedType,
   getPromisePayloadType,
+  isStreamingBodyType,
 } from './utils'
 import { Components } from './components'
 
@@ -586,21 +587,30 @@ const getResponseDefinition = (
       description,
       ...(bodySchema
         ? {
-            content:
-              isStringType(bodyType) || isNumberType(bodyType)
-                ? { 'text/plain': { schema: bodySchema } }
-                : isBufferType(bodyType)
-                ? { 'application/octet-stream': { schema: bodySchema } }
-                : { 'application/json': { schema: bodySchema } },
+            content: {
+              [getResponseContentType(bodyType)]: { schema: bodySchema },
+            },
           }
         : undefined),
-      ...(headers
-        ? {
-            headers,
-          }
-        : undefined),
+      ...(headers ? { headers } : undefined),
     },
   }
+}
+
+const getResponseContentType = (bodyType: ts.Type) => {
+  if (
+    isStringType(bodyType) ||
+    isNumberType(bodyType) ||
+    isBooleanType(bodyType)
+  ) {
+    return 'text/plain'
+  }
+
+  if (isBufferType(bodyType) || isStreamingBodyType(bodyType)) {
+    return 'application/octet-stream'
+  }
+
+  return 'application/json'
 }
 
 const typeToRequestParameters = (
@@ -731,7 +741,7 @@ const typeToSchema = (
         return { type: 'string', format: 'date-time', ...base }
       }
 
-      if (isBufferType(type)) {
+      if (isBufferType(type) || isStreamingBodyType(type)) {
         return { type: 'string', format: 'binary', ...base }
       }
 
