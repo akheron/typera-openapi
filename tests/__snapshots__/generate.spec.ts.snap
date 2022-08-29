@@ -443,6 +443,29 @@ Object {
             "description": "OK",
           },
         },
+        "tags": Array [
+          "TagFromRouter",
+        ],
+      },
+    },
+    "/other-stuff/route-with-tag": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+        "tags": Array [
+          "TagFromRoute",
+          "TagFromRouter",
+        ],
       },
     },
     "/query": Object {

@@ -64,10 +64,12 @@ const myRoute: Route<Response.Ok<MyResult> | Response.BadRequest<string>> =
 
 /**
  * @prefix /api
+ * @tags Tag3
  */
 export default router(myRoute, ...)
 
-// The optional @prefix JSDoc tag prepends the prefix to all route paths.
+// The optional @prefix JSDoc tag prepends the prefix to all route paths.
+// Tags from router are added to all its routes.
 ```
 
 Run the `typera-openapi` tool giving paths to your route files as command line
@@ -218,6 +220,7 @@ Terms:
 - Route handler is the function passed to `.handler()` when defining a route
 - `request` is the sole parameter of the route handler function.
 - Route type is the type of the route variable returned by `route.get()` etc.
+- Router is the value returned by `router()`.
 
 For each route, typera-openapi determines the following information:
 
@@ -232,8 +235,13 @@ For each route, typera-openapi determines the following information:
 | request body | See table below                                    |
 | responses    | See table below                                    |
 
-Additionally, if the parent `router()` call has a `@prefix` tag in the JSDoc
-comment, it's prepended to the path of each of the routes.
+The JSDoc comment of the router can be used to add information to all its
+routes:
+
+| Information | Source                                                |
+| ----------- | ----------------------------------------------------- |
+| path prefix | JSDoc comment's `@path` tag is prefixed to all routes |
+| tags        | JSDoc comment's `@tags` are added to all routes       |
 
 OpenAPI parameters covers all the other input expect the request body:
 
