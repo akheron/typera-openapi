@@ -96,6 +96,7 @@ const visitTopLevelNode = (
 ): OpenAPIV3.PathsObject | undefined => {
   if (ts.isExportAssignment(node) && !node.isExportEquals) {
     const prefix = getRouterPrefix(node)
+    const tags = getNodeTags(node)
 
     // 'export default' statement
     const argSymbols = getRouterCallArgSymbols(ctx, node.expression)
@@ -125,8 +126,15 @@ const visitTopLevelNode = (
         const [path, method, operation] = routeDeclaration
         const prefixedPath = prefix + path
         const pathsItemObject = paths[prefixedPath]
+        const operationWithRouterTags =
+          tags.length > 0
+            ? {
+                ...operation,
+                tags: [...(operation.tags ?? []), ...tags],
+              }
+            : operation
         if (!pathsItemObject) {
-          paths[prefixedPath] = { [method]: operation }
+          paths[prefixedPath] = { [method]: operationWithRouterTags }
         } else {
           pathsItemObject[method] = operation
         }
@@ -164,7 +172,7 @@ const getRouteDeclaration = (
 ): [string, Method, OpenAPIV3.OperationObject] | undefined => {
   const description = getDescriptionFromComment(ctx, symbol)
   const summary = getRouteSummary(symbol)
-  const tags = getRouteTags(symbol)
+  const tags = getSymbolTags(symbol)
   const routeInput = getRouteInput(ctx, symbol)
   if (!routeInput) {
     ctx.log('warn', `Could not determine route input for symbol ${symbol.name}`)
@@ -232,13 +240,21 @@ const getRouteSummary = (symbol: ts.Symbol): string | undefined =>
     .filter(isDefined)
     .map((symbolDisplayPart) => symbolDisplayPart.text)[0]
 
-const getRouteTags = (symbol: ts.Symbol): string[] | undefined =>
+const getSymbolTags = (symbol: ts.Symbol): string[] | undefined =>
   symbol
     .getJsDocTags()
     .filter((tag) => tag.name === 'tags')
     .flatMap((tag) => tag.text)
     .filter(isDefined)
     .flatMap((symbolDisplayPart) => symbolDisplayPart.text.split(','))
+    .map((tag) => tag.trim())
+
+const getNodeTags = (node: ts.Node): string[] =>
+  ts
+    .getJSDocTags(node)
+    .filter((tag) => tag.tagName.escapedText === 'tags')
+    .flatMap((tag) => (typeof tag.comment === 'string' ? [tag.comment] : []))
+    .flatMap((text) => text.split(','))
     .map((tag) => tag.trim())
 
 const getRouterPrefix = (node: ts.Node): string =>
