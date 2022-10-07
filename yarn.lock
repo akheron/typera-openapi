@@ -1090,9 +1090,9 @@
   integrity sha512-Jus9s4CDbqwocc5pOAnh8ShfrnMcPHuJYzVcSUU7lrh8Ni5HuIqX3oilL86p3dlTrk0LzHRCgA/GQ7uNCw6l2Q==
 
 "@types/node@*":
-  version "18.8.2"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.8.2.tgz#17d42c6322d917764dd3d2d3a10d7884925de067"
-  integrity sha512-cRMwIgdDN43GO4xMWAfJAecYn8wV4JbsOGHNfNUIDiuYkUYAR5ec4Rj7IO2SAhFPEfpPtLtUTbbny/TCT7aDwA==
+  version "18.8.3"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.8.3.tgz#ce750ab4017effa51aed6a7230651778d54e327c"
+  integrity sha512-0os9vz6BpGwxGe9LOhgP/ncvYN5Tx1fNcd2TM3rD/aCGBkysb+ZWpXEocG24h6ZzOi13+VB8HndAQFezsSOw1w==
 
 "@types/prettier@^2.1.5":
   version "2.2.3"
