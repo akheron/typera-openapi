@@ -174,7 +174,8 @@ const getRouteDeclaration = (
   const summary = getRouteSummary(symbol)
   const tags = getSymbolTags(symbol)
   const routeInput = getRouteInput(ctx, symbol)
-  const operationId = getRouteOperationId(symbol)
+  const operationId =
+    getRouteOperationId(symbol) ?? symbol.escapedName.toString()
 
   if (!routeInput) {
     ctx.log('warn', `Could not determine route input for symbol ${symbol.name}`)
@@ -219,7 +220,7 @@ const getRouteDeclaration = (
     method,
     {
       ...(summary ? { summary } : undefined),
-      ...(operationId ? { operationId } : undefined),
+      ...{ operationId },
       ...(description ? { description } : undefined),
       ...(tags && tags.length > 0 ? { tags } : undefined),
       ...(parameters.length > 0 ? { parameters } : undefined),

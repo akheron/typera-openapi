@@ -125,6 +125,7 @@ Object {
   "paths": Object {
     "/binary-response": Object {
       "get": Object {
+        "operationId": "binaryResponse",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -142,6 +143,7 @@ Object {
     },
     "/branded-request-body": Object {
       "post": Object {
+        "operationId": "brandedRequestBody",
         "requestBody": Object {
           "content": Object {
             "application/json": Object {
@@ -190,7 +192,7 @@ Object {
     "/constant": Object {
       "get": Object {
         "description": "No input, static output, has a tag",
-        "operationId": "getConstant",
+        "operationId": "getConstantWithCustomOperationId",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -211,6 +213,7 @@ Object {
     },
     "/cookies": Object {
       "get": Object {
+        "operationId": "cookies",
         "parameters": Array [
           Object {
             "in": "cookie",
@@ -266,6 +269,7 @@ Object {
     },
     "/custom-content-type": Object {
       "get": Object {
+        "operationId": "customContentType",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -290,6 +294,7 @@ Object {
     },
     "/direct-route-call": Object {
       "get": Object {
+        "operationId": "directRouteCall",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -306,6 +311,7 @@ Object {
     },
     "/handler-not-inline": Object {
       "post": Object {
+        "operationId": "handlerNotInline",
         "requestBody": Object {
           "content": Object {
             "application/json": Object {
@@ -349,6 +355,7 @@ Object {
     },
     "/interface-array-response": Object {
       "get": Object {
+        "operationId": "interfaceArrayResponse",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -368,6 +375,7 @@ Object {
     },
     "/interface-response": Object {
       "get": Object {
+        "operationId": "interfaceResponse",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -384,6 +392,7 @@ Object {
     },
     "/no-explicit-route-type": Object {
       "get": Object {
+        "operationId": "noExplicitRouteType",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -400,6 +409,7 @@ Object {
     },
     "/other-file-default-export": Object {
       "get": Object {
+        "operationId": "default",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -416,6 +426,7 @@ Object {
     },
     "/other-file-export": Object {
       "get": Object {
+        "operationId": "otherFileExport",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -432,6 +443,7 @@ Object {
     },
     "/other-stuff/other-route": Object {
       "get": Object {
+        "operationId": "otherRoute",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -451,6 +463,7 @@ Object {
     },
     "/other-stuff/route-with-tag": Object {
       "get": Object {
+        "operationId": "routeWithTag",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -471,6 +484,7 @@ Object {
     },
     "/query": Object {
       "get": Object {
+        "operationId": "query",
         "parameters": Array [
           Object {
             "in": "query",
@@ -515,6 +529,7 @@ Object {
     },
     "/recursive-types": Object {
       "get": Object {
+        "operationId": "recursiveTypes",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -532,6 +547,7 @@ Object {
     "/request-body": Object {
       "post": Object {
         "description": "This one has request body and two possible successful responses and multiple tags",
+        "operationId": "requestBody",
         "requestBody": Object {
           "content": Object {
             "application/json": Object {
@@ -645,6 +661,7 @@ Object {
     },
     "/request-headers": Object {
       "get": Object {
+        "operationId": "requestHeaders",
         "parameters": Array [
           Object {
             "in": "header",
@@ -689,6 +706,7 @@ Object {
     },
     "/response-body-boolean": Object {
       "get": Object {
+        "operationId": "responseBodyBoolean",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -705,6 +723,7 @@ Object {
     },
     "/response-body-buffer": Object {
       "get": Object {
+        "operationId": "responseBodyBuffer",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -722,6 +741,7 @@ Object {
     },
     "/response-body-number": Object {
       "get": Object {
+        "operationId": "responseBodyNumber",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -738,6 +758,7 @@ Object {
     },
     "/response-body-streaming": Object {
       "get": Object {
+        "operationId": "responseBodyStreaming",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -755,6 +776,7 @@ Object {
     },
     "/response-headers": Object {
       "get": Object {
+        "operationId": "responseHeaders",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -785,6 +807,7 @@ Object {
     },
     "/same-path-route": Object {
       "get": Object {
+        "operationId": "samePathRoute1",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -807,6 +830,7 @@ Object {
         },
       },
       "post": Object {
+        "operationId": "samePathRoute2",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -831,6 +855,7 @@ Object {
     },
     "/schema-docstrings": Object {
       "get": Object {
+        "operationId": "schemaDocstrings",
         "parameters": Array [
           Object {
             "description": "Foo bar baz",
@@ -886,6 +911,7 @@ Object {
     },
     "/type-alias": Object {
       "get": Object {
+        "operationId": "typeAlias",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -912,6 +938,7 @@ Object {
     },
     "/unused-request": Object {
       "get": Object {
+        "operationId": "unusedRequest",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -928,6 +955,7 @@ Object {
     },
     "/user/{id}/{other}": Object {
       "get": Object {
+        "operationId": "routeParams",
         "parameters": Array [
           Object {
             "in": "path",
@@ -974,6 +1002,7 @@ Object {
     },
     "/uses-custom-route": Object {
       "get": Object {
+        "operationId": "usesCustomRoute",
         "responses": Object {
           "200": Object {
             "content": Object {
@@ -990,6 +1019,7 @@ Object {
     },
     "/with-content-type-middleware": Object {
       "post": Object {
+        "operationId": "withContentTypeMiddleware",
         "requestBody": Object {
           "content": Object {
             "application/x-www-form-urlencoded": Object {
