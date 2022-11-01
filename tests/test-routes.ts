@@ -21,6 +21,7 @@ import { formUrlEncodedMiddleware } from './middlewares'
  *
  * @tags Tag
  * @summary This is a summary
+ * @operationId getConstant
  * @response 200 Successful result
  */
 const constant: Route<Response.Ok<string>> = route
