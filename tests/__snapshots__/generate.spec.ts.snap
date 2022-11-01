@@ -190,6 +190,7 @@ Object {
     "/constant": Object {
       "get": Object {
         "description": "No input, static output, has a tag",
+        "operationId": "getConstant",
         "responses": Object {
           "200": Object {
             "content": Object {

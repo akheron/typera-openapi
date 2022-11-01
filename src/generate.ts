@@ -174,6 +174,8 @@ const getRouteDeclaration = (
   const summary = getRouteSummary(symbol)
   const tags = getSymbolTags(symbol)
   const routeInput = getRouteInput(ctx, symbol)
+  const operationId = getRouteOperationId(symbol)
+
   if (!routeInput) {
     ctx.log('warn', `Could not determine route input for symbol ${symbol.name}`)
     return
@@ -217,6 +219,7 @@ const getRouteDeclaration = (
     method,
     {
       ...(summary ? { summary } : undefined),
+      ...(operationId ? { operationId } : undefined),
       ...(description ? { description } : undefined),
       ...(tags && tags.length > 0 ? { tags } : undefined),
       ...(parameters.length > 0 ? { parameters } : undefined),
@@ -248,6 +251,14 @@ const getSymbolTags = (symbol: ts.Symbol): string[] | undefined =>
     .filter(isDefined)
     .flatMap((symbolDisplayPart) => symbolDisplayPart.text.split(','))
     .map((tag) => tag.trim())
+
+const getRouteOperationId = (symbol: ts.Symbol): string | undefined =>
+  symbol
+    .getJsDocTags()
+    .filter((tag) => tag.name === 'operationId')
+    .flatMap((tag) => tag.text)
+    .filter(isDefined)
+    .map((symbolDisplayPart) => symbolDisplayPart.text)[0]
 
 const getNodeTags = (node: ts.Node): string[] =>
   ts
