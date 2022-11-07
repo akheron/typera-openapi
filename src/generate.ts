@@ -103,6 +103,7 @@ const visitTopLevelNode = (
     if (!argSymbols) return
 
     const paths: OpenAPIV3.PathsObject = {}
+    const operationIds = new Set<string>()
 
     argSymbols.forEach((symbol) => {
       let location = symbol.valueDeclaration
@@ -137,6 +138,14 @@ const visitTopLevelNode = (
           paths[prefixedPath] = { [method]: operationWithRouterTags }
         } else {
           pathsItemObject[method] = operation
+        }
+
+        if (operation.operationId) {
+          if (!operationIds.has(operation.operationId)) {
+            operationIds.add(operation.operationId)
+          } else {
+            ctx.log('warn', `Duplicated operationId ${operation.operationId}`)
+          }
         }
       }
     })
