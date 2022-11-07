@@ -1,5 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`generate duplicated operationId warnings 1`] = `
+Array [
+  Object {
+    "level": "warn",
+    "location": "tests/duplicated-operation-ids-routes.ts:22:0",
+    "message": "Duplicated operationId routeOne",
+  },
+]
+`;
+
 exports[`generate warnings 1`] = `
 Array [
   Object {
