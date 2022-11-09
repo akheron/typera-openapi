@@ -49,6 +49,7 @@ export const generate = (
   const checker = program.getTypeChecker()
 
   const seenFileNames = new Set<string>()
+  const seenOperationIds = new Set<string>()
 
   const components = new Components()
   let paths: OpenAPIV3.PathsObject = {}
@@ -66,6 +67,7 @@ export const generate = (
       const newPaths = visitTopLevelNode(
         context(checker, sourceFile, log, node),
         components,
+        seenOperationIds,
         node
       )
       if (newPaths) {
@@ -92,6 +94,7 @@ const isSameFile = (a: string, b: string) => path.resolve(a) === path.resolve(b)
 const visitTopLevelNode = (
   ctx: Context,
   components: Components,
+  seenOperationIds: Set<string>,
   node: ts.Node
 ): OpenAPIV3.PathsObject | undefined => {
   if (ts.isExportAssignment(node) && !node.isExportEquals) {
@@ -103,7 +106,6 @@ const visitTopLevelNode = (
     if (!argSymbols) return
 
     const paths: OpenAPIV3.PathsObject = {}
-    const operationIds = new Set<string>()
 
     argSymbols.forEach((symbol) => {
       let location = symbol.valueDeclaration
@@ -141,10 +143,13 @@ const visitTopLevelNode = (
         }
 
         if (operation.operationId) {
-          if (!operationIds.has(operation.operationId)) {
-            operationIds.add(operation.operationId)
+          if (!seenOperationIds.has(operation.operationId)) {
+            seenOperationIds.add(operation.operationId)
           } else {
-            ctx.log('warn', `Duplicated operationId ${operation.operationId}`)
+            ctx.log(
+              'warn',
+              `Duplicated operationId ${operation.operationId}. Use @operationId in JSDoc comment to override.`
+            )
           }
         }
       }

@@ -5,7 +5,7 @@ Array [
   Object {
     "level": "warn",
     "location": "tests/duplicated-operation-ids-routes.ts:22:0",
-    "message": "Duplicated operationId routeOne",
+    "message": "Duplicated operationId routeOne. Use @operationId in JSDoc comment to override.",
   },
 ]
 `;
