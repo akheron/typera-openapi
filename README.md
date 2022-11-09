@@ -224,16 +224,17 @@ Terms:
 
 For each route, typera-openapi determines the following information:
 
-| Information  | Source                                             |
-| ------------ | -------------------------------------------------- |
-| method       | Which `route` method is called, e.g. `route.get()` |
-| path         | The parameter of e.g. `route.get()`                |
-| summary      | JSDoc comment's `@summary` tag                     |
-| description  | JSDoc comment's text                               |
-| tags         | JSDoc comment's `@tags`                            |
-| parameters   | See table below                                    |
-| request body | See table below                                    |
-| responses    | See table below                                    |
+| Information  | Source                                                                                  |
+| ------------ | --------------------------------------------------------------------------------------- |
+| method       | Which `route` method is called, e.g. `route.get()`                                      |
+| path         | The parameter of e.g. `route.get()`                                                     |
+| summary      | JSDoc comment's `@summary` tag                                                          |
+| description  | JSDoc comment's text                                                                    |
+| tags         | JSDoc comment's `@tags`                                                                 |
+| operationId  | Name of the variable that holds the route, override with JSDoc comment's `@operationId` |
+| parameters   | See table below                                                                         |
+| request body | See table below                                                                         |
+| responses    | See table below                                                                         |
 
 The JSDoc comment of the router can be used to add information to all its
 routes:
