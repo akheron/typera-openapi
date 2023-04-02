@@ -30,6 +30,22 @@ const constant: Route<Response.Ok<string>> = route
     return Response.ok('bar')
   })
 
+const anyOf: Route<
+  | Response.Ok<{ status: 'success' }>
+  | Response.Ok<{ status: 'error'; errorCode: string }>
+> = route.get('/any-of').handler(async () => {
+  return (
+    Response.ok({ status: 'success' }) ||
+    Response.ok({ status: 'error', errorCode: 'foo' })
+  )
+})
+
+const anyOfContentTypes: Route<
+  Response.Ok<{ foo: string }> | Response.Ok<number>
+> = route.get('/any-of-content-types').handler(async () => {
+  return Response.ok({ foo: 'bar' }) || Response.ok(42)
+})
+
 // Direct route() call
 const directRouteCall: Route<Response.Ok<string>> = route(
   'get',
@@ -332,6 +348,8 @@ const customContentType: Route<
 
 export default router(
   constant,
+  anyOf,
+  anyOfContentTypes,
   directRouteCall,
   requestBody,
   interfaceResponse,

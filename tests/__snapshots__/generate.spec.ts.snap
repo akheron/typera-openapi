@@ -133,6 +133,86 @@ Object {
     },
   },
   "paths": Object {
+    "/any-of": Object {
+      "get": Object {
+        "operationId": "anyOf",
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "oneOf": Array [
+                    Object {
+                      "properties": Object {
+                        "status": Object {
+                          "enum": Array [
+                            "success",
+                          ],
+                          "type": "string",
+                        },
+                      },
+                      "required": Array [
+                        "status",
+                      ],
+                      "type": "object",
+                    },
+                    Object {
+                      "properties": Object {
+                        "errorCode": Object {
+                          "type": "string",
+                        },
+                        "status": Object {
+                          "enum": Array [
+                            "error",
+                          ],
+                          "type": "string",
+                        },
+                      },
+                      "required": Array [
+                        "status",
+                        "errorCode",
+                      ],
+                      "type": "object",
+                    },
+                  ],
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
+    "/any-of-content-types": Object {
+      "get": Object {
+        "operationId": "anyOfContentTypes",
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "properties": Object {
+                    "foo": Object {
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "foo",
+                  ],
+                  "type": "object",
+                },
+              },
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "number",
+                },
+              },
+            },
+            "description": "OK",
+          },
+        },
+      },
+    },
     "/binary-response": Object {
       "get": Object {
         "operationId": "binaryResponse",
@@ -545,7 +625,17 @@ Object {
             "content": Object {
               "application/json": Object {
                 "schema": Object {
-                  "$ref": "#/components/schemas/IndirectRecursiveType",
+                  "oneOf": Array [
+                    Object {
+                      "$ref": "#/components/schemas/DirectRecursiveType",
+                    },
+                    Object {
+                      "$ref": "#/components/schemas/DirectRecursiveIntersection",
+                    },
+                    Object {
+                      "$ref": "#/components/schemas/IndirectRecursiveType",
+                    },
+                  ],
                 },
               },
             },
