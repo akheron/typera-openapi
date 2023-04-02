@@ -530,22 +530,30 @@ const getResponseTypes = (
     )
     if (responseDef) result[responseDef.status] = responseDef.response
   } else if (responseType.isUnion()) {
-    responseType.types.forEach((type) => {
-      const responseDef = getResponseDefinition(
-        ctx,
-        components,
-        descriptions,
-        type
+    const responsesByStatusCode: {
+      [code: string]: OpenAPIV3.ResponseObject[]
+    } = {}
+
+    responseType.types
+      .flatMap(
+        (type) =>
+          getResponseDefinition(ctx, components, descriptions, type) || []
       )
-      if (responseDef) result[responseDef.status] = responseDef.response
-    })
+      .forEach(({ status, response }) => {
+        if (responsesByStatusCode[status])
+          responsesByStatusCode[status].push(response)
+        else responsesByStatusCode[status] = [response]
+      })
+
+    for (const status in responsesByStatusCode) {
+      result[status] = mergeResponses(...responsesByStatusCode[status])
+    }
   }
 
   if (Object.keys(result).length === 0) {
     // Any response types could not be determined so this is not a valid route after all
     return
   }
-
   return result
 }
 
@@ -566,6 +574,50 @@ const getResponseDescriptions = (
       })
       .filter(isDefined)
   )
+
+const mergeResponses = (
+  ...responses: OpenAPIV3.ResponseObject[]
+): OpenAPIV3.ResponseObject => {
+  if (responses.length === 1) return responses[0]
+
+  const mergedResponse = {
+    description: '',
+    content: {} as {
+      [media: string]: OpenAPIV3.MediaTypeObject
+    },
+  }
+
+  for (const response of responses) {
+    const content = response.content
+
+    if (!content) continue
+
+    for (const mediaType in content) {
+      const schema = content[mediaType]?.schema
+
+      if (!schema) continue
+
+      const mergedSchema = mergedResponse.content[mediaType]
+        ?.schema as OpenAPIV3.SchemaObject
+
+      if (!mergedSchema) {
+        mergedResponse.content[mediaType] = { schema }
+      } else if (!mergedSchema.oneOf) {
+        mergedResponse.content[mediaType].schema = {
+          oneOf: [mergedSchema, schema],
+        }
+      } else {
+        mergedSchema.oneOf.push(schema)
+      }
+    }
+
+    if (response.description) {
+      mergedResponse.description = response.description
+    }
+  }
+
+  return mergedResponse
+}
 
 const getResponseDefinition = (
   ctx: Context,
