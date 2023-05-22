@@ -22,6 +22,7 @@ import {
   getBrandedType,
   getPromisePayloadType,
   isStreamingBodyType,
+  isReadonlyType,
 } from './utils'
 import { Components } from './components'
 
@@ -871,6 +872,12 @@ const typeToSchema = (
 
       if (isBufferType(type) || isStreamingBodyType(type)) {
         return { type: 'string', format: 'binary', ...base }
+      }
+
+      if (isReadonlyType(type) && type.aliasTypeArguments) {
+        const readonlyType = type.aliasTypeArguments[0]
+
+        return typeToSchema(ctx, components, readonlyType, options)
       }
 
       if (

@@ -32,6 +32,8 @@ export const isInterface = (symbol: ts.Symbol): boolean =>
   !!(symbol.flags & ts.SymbolFlags.Interface)
 export const isTypeAlias = (symbol: ts.Symbol): boolean =>
   !!(symbol.flags & ts.SymbolFlags.TypeAlias)
+export const isReadonlyType = (type: ts.Type): boolean =>
+  type.aliasSymbol?.escapedName === 'Readonly'
 
 // Check for a specific object type based on type name and property names
 const duckTypeChecker =
