@@ -617,6 +617,54 @@ Object {
         },
       },
     },
+    "/readonly-request-body": Object {
+      "post": Object {
+        "operationId": "readonlyRequestBody",
+        "requestBody": Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "properties": Object {
+                  "int": Object {
+                    "type": "number",
+                  },
+                  "str": Object {
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "int",
+                  "str",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "number",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
+      },
+    },
     "/recursive-types": Object {
       "get": Object {
         "operationId": "recursiveTypes",
