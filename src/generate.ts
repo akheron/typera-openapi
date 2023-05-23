@@ -180,6 +180,19 @@ const getRouterCallArgSymbols = (
   return argSymbols
 }
 
+const getRouteParameters = (
+  symbol: ts.Symbol
+): [string, string | undefined][] =>
+  symbol
+    .getJsDocTags()
+    .filter((tag) => tag.name === 'routeParam')
+    .flatMap((tag) => tag.text)
+    .filter(isDefined)
+    .map((symbolDisplayPart) => symbolDisplayPart.text)
+    .map((tag) => tag.trim())
+    .map((tagString) => tagString.split(' '))
+    .map((tag) => [tag[0], tag.slice(1).join(' ') || undefined])
+
 const getRouteDeclaration = (
   ctx: Context,
   components: Components,
@@ -189,6 +202,10 @@ const getRouteDeclaration = (
   const summary = getRouteSummary(symbol)
   const tags = getSymbolTags(symbol)
   const routeInput = getRouteInput(ctx, symbol)
+  const routeParameterDescriptions = new Map<string, string | undefined>(
+    getRouteParameters(symbol)
+  )
+
   const operationId =
     getRouteOperationId(symbol) ?? symbol.escapedName.toString()
 
@@ -222,7 +239,12 @@ const getRouteDeclaration = (
       : undefined
 
   const parameters = [
-    ...typeToRequestParameters(ctx, 'path', routeParams),
+    ...typeToRequestParameters(
+      ctx,
+      'path',
+      routeParams,
+      routeParameterDescriptions
+    ),
     ...typeToRequestParameters(ctx, 'query', query),
     ...typeToRequestParameters(ctx, 'header', headers),
     ...typeToRequestParameters(ctx, 'cookie', cookies),
@@ -745,19 +767,36 @@ const getContentTypeHeader = (
 const typeToRequestParameters = (
   ctx: Context,
   in_: 'path' | 'query' | 'header' | 'cookie',
-  type: ts.Type | undefined
+  type: ts.Type | undefined,
+  routeParameters?: Map<string, string | undefined>
 ): OpenAPIV3.ParameterObject[] => {
   if (!type) return []
 
   const props = ctx.checker.getPropertiesOfType(type)
+  const missingRouteParam = routeParameters
+    ? [...routeParameters.keys()].find(
+        (param) => !props.map((prop) => prop.name).includes(param)
+      )
+    : undefined
+  if (missingRouteParam) {
+    throw new Error(`RouteParameter ${missingRouteParam} does not exist.`)
+  }
   return props.map((prop): OpenAPIV3.ParameterObject => {
     const description = getDescriptionFromComment(ctx, prop)
     return {
       name: prop.name,
       in: in_,
       required: in_ === 'path' ? true : !isOptional(prop),
-      schema: { type: 'string' },
-      ...(description ? { description } : undefined),
+      schema: {
+        type: 'string',
+      },
+      ...(routeParameters
+        ? routeParameters.get(prop.name)
+          ? { description: routeParameters.get(prop.name) }
+          : undefined
+        : description
+        ? { description }
+        : undefined),
     }
   })
 }
@@ -788,7 +827,9 @@ const getBaseSchema = (
   symbol: ts.Symbol | undefined
 ): BaseSchema => {
   const description = symbol ? getDescriptionFromComment(ctx, symbol) : ''
-  return { ...(description ? { description } : undefined) }
+  return {
+    ...(description ? { description } : undefined),
+  }
 }
 
 const typeToSchema = (

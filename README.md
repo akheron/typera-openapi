@@ -56,6 +56,7 @@ const bodyCodec = t.type({
  * @response 200 Success response description.
  * @response 400 Another description for a response. This one
  * spans multile lines.
+ * @routeParam myRouteParam pathparameter description
  */
 const myRoute: Route<Response.Ok<MyResult> | Response.BadRequest<string>> =
   route.post(...).use(Parser.body(bodyCodec)).handler(...)
