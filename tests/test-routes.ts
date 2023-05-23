@@ -185,6 +185,23 @@ const brandedRequestBody: Route<
     return Response.ok(request.body.int)
   })
 
+//Request body has a readonly type
+const readonlyCodec = t.readonly(
+  t.type({
+    int: t.number,
+    str: t.string,
+  })
+)
+
+const readonlyRequestBody: Route<
+  Response.Ok<number> | Response.BadRequest<string>
+> = route
+  .post('/readonly-request-body')
+  .use(Parser.body(readonlyCodec))
+  .handler(async (request) => {
+    return Response.ok(request.body.int)
+  })
+
 // Request headers
 const requestHeaders: Route<Response.Ok<string> | Response.BadRequest<string>> =
   route
@@ -360,6 +377,7 @@ export default router(
   routeParams,
   cookies,
   brandedRequestBody,
+  readonlyRequestBody,
   requestHeaders,
   responseHeaders,
   usesCustomRoute,
