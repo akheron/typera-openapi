@@ -551,6 +551,47 @@ Object {
         ],
       },
     },
+    "/other-stuff/route-with-route-parameter-tag/{myRouteParameter}": Object {
+      "get": Object {
+        "operationId": "routeWithRouteParameterTag",
+        "parameters": Array [
+          Object {
+            "description": "12345",
+            "in": "path",
+            "name": "myRouteParameter",
+            "required": true,
+            "schema": Object {
+              "type": "string",
+            },
+          },
+        ],
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
+        "tags": Array [
+          "TagFromRouter",
+        ],
+      },
+    },
     "/other-stuff/route-with-tag": Object {
       "get": Object {
         "operationId": "routeWithTag",
