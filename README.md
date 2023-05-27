@@ -53,10 +53,11 @@ const bodyCodec = t.type({
  * @summary You can also set a short summary
  * @tags Tag1, Tag2
  *
+ * @routeParam myRouteParam Description for route parameter
+ *
  * @response 200 Success response description.
  * @response 400 Another description for a response. This one
  * spans multile lines.
- * @routeParam myRouteParam pathparameter description
  */
 const myRoute: Route<Response.Ok<MyResult> | Response.BadRequest<string>> =
   route.post(...).use(Parser.body(bodyCodec)).handler(...)

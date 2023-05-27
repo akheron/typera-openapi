@@ -556,7 +556,7 @@ Object {
         "operationId": "routeWithRouteParameterTag",
         "parameters": Array [
           Object {
-            "description": "12345",
+            "description": "Description goes here",
             "in": "path",
             "name": "myRouteParameter",
             "required": true,
