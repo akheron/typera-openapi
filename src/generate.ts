@@ -768,18 +768,24 @@ const typeToRequestParameters = (
   ctx: Context,
   in_: 'path' | 'query' | 'header' | 'cookie',
   type: ts.Type | undefined,
-  routeParameters?: Map<string, string | undefined>
+  descriptions?: Map<string, string | undefined>
 ): OpenAPIV3.ParameterObject[] => {
   if (!type) return []
 
   const props = ctx.checker.getPropertiesOfType(type)
-  const missingRouteParam = routeParameters
-    ? [...routeParameters.keys()].find(
-        (param) => !props.map((prop) => prop.name).includes(param)
+
+  if (descriptions) {
+    const propNames = new Set(props.map((prop) => prop.name))
+    const extraneousDescriptions = [...descriptions.keys()].filter(
+      (name) => !propNames.has(name)
+    )
+    if (extraneousDescriptions.length > 0) {
+      throw new Error(
+        `Descriptions provided for unmatched ${in_} parameters: ${extraneousDescriptions.join(
+          ', '
+        )}`
       )
-    : undefined
-  if (missingRouteParam) {
-    throw new Error(`RouteParameter ${missingRouteParam} does not exist.`)
+    }
   }
   return props.map((prop): OpenAPIV3.ParameterObject => {
     const description = getDescriptionFromComment(ctx, prop)
@@ -790,9 +796,9 @@ const typeToRequestParameters = (
       schema: {
         type: 'string',
       },
-      ...(routeParameters
-        ? routeParameters.get(prop.name)
-          ? { description: routeParameters.get(prop.name) }
+      ...(descriptions
+        ? descriptions.get(prop.name)
+          ? { description: descriptions.get(prop.name) }
           : undefined
         : description
         ? { description }

@@ -1,7 +1,7 @@
 import { Response, route, Route, router } from 'typera-express'
 
 /**
- * @routeParam myRouteParameter 12345
+ * @routeParam myRouteParameter Description goes here
  */
 const routeWithRouteParameterTag: Route<
   Response.Ok<string> | Response.BadRequest<string, undefined>
