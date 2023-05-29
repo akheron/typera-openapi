@@ -795,6 +795,7 @@ const typeToRequestParameters = (
       required: in_ === 'path' ? true : !isOptional(prop),
       schema: {
         type: 'string',
+        example: getExampleValue(prop),
       },
       ...(descriptions
         ? descriptions.get(prop.name)
@@ -816,7 +817,9 @@ const typeToResponseHeaders = (ctx: Context, type: ts.Type): Headers => {
   const props = ctx.checker.getPropertiesOfType(type)
   props.forEach((prop) => {
     result[prop.name] = {
-      schema: { type: 'string' },
+      schema: {
+        type: 'string',
+      },
       required: !isOptional(prop),
     }
   })
@@ -833,10 +836,21 @@ const getBaseSchema = (
   symbol: ts.Symbol | undefined
 ): BaseSchema => {
   const description = symbol ? getDescriptionFromComment(ctx, symbol) : ''
+  const example = symbol ? getExampleValue(symbol) : ''
   return {
     ...(description ? { description } : undefined),
+    ...(example ? { example } : undefined),
   }
 }
+
+const getExampleValue = (symbol: ts.Symbol) =>
+  symbol
+    .getJsDocTags()
+    .filter((tag) => tag.name === 'example')
+    .flatMap((tag) => tag.text)
+    .filter(isDefined)
+    .map((symbolDisplayPart) => symbolDisplayPart.text)
+    .map((tag) => tag.trim())[0]
 
 const typeToSchema = (
   ctx: Context,
