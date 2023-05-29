@@ -789,13 +789,14 @@ const typeToRequestParameters = (
   }
   return props.map((prop): OpenAPIV3.ParameterObject => {
     const description = getDescriptionFromComment(ctx, prop)
+    const example = getExampleValue(prop)
     return {
       name: prop.name,
       in: in_,
       required: in_ === 'path' ? true : !isOptional(prop),
       schema: {
         type: 'string',
-        example: getExampleValue(prop),
+        ...(example ? { example } : undefined),
       },
       ...(descriptions
         ? descriptions.get(prop.name)
@@ -836,7 +837,7 @@ const getBaseSchema = (
   symbol: ts.Symbol | undefined
 ): BaseSchema => {
   const description = symbol ? getDescriptionFromComment(ctx, symbol) : ''
-  const example = symbol ? getExampleValue(symbol) : ''
+  const example = symbol ? getExampleValue(symbol) : undefined
   return {
     ...(description ? { description } : undefined),
     ...(example ? { example } : undefined),

@@ -43,7 +43,9 @@ interface MyResult {
 }
 
 const bodyCodec = t.type({
-  /** Descriptions are also supported in io-ts codecs */
+  /** Descriptions are also supported in io-ts codecs
+   * @example Lets you set an example value for a particular property
+   */
   name: t.string
 })
 

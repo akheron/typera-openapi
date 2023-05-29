@@ -363,6 +363,44 @@ const customContentType: Route<
   return Response.ok('foo;bar;baz', { 'Content-Type': 'text/csv' })
 })
 
+const queryWithExampleValue = t.type({
+  /** @example Example query */
+  queryParam: t.string,
+})
+
+const headerWithExampleValue = t.type({
+  /** @example Example header */
+  headerValue: t.string,
+})
+
+const cookieWithExampleValue = t.type({
+  /** @example Example cookie */
+  cookieValue: t.string,
+})
+
+const requestBodyWithExampleValue = t.type({
+  /** @example Example request parameter */
+  requestParam: t.string,
+})
+
+const responseBodyWithExampleValue = t.type({
+  /** @example Example response parameter */
+  responseParam: t.string,
+})
+
+const routeWithExampleValues: Route<
+  | Response.Ok<t.TypeOf<typeof responseBodyWithExampleValue>>
+  | Response.BadRequest<string>
+> = route
+  .get('/route-with-example-values')
+  .use(
+    Parser.body(requestBodyWithExampleValue),
+    Parser.query(queryWithExampleValue),
+    Parser.headers(headerWithExampleValue),
+    Parser.cookies(cookieWithExampleValue)
+  )
+  .handler(async () => Response.ok({ responseParam: 'foo' }))
+
 export default router(
   constant,
   anyOf,
@@ -382,6 +420,7 @@ export default router(
   responseHeaders,
   usesCustomRoute,
   schemaDocstrings,
+  routeWithExampleValues,
   binaryResponse,
   samePathRoute1,
   samePathRoute2,
