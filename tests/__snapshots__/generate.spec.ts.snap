@@ -994,6 +994,89 @@ Object {
         },
       },
     },
+    "/route-with-example-values": Object {
+      "get": Object {
+        "operationId": "routeWithExampleValues",
+        "parameters": Array [
+          Object {
+            "in": "query",
+            "name": "queryParam",
+            "required": true,
+            "schema": Object {
+              "example": "Example query",
+              "type": "string",
+            },
+          },
+          Object {
+            "in": "header",
+            "name": "headerValue",
+            "required": true,
+            "schema": Object {
+              "example": "Example header",
+              "type": "string",
+            },
+          },
+          Object {
+            "in": "cookie",
+            "name": "cookieValue",
+            "required": true,
+            "schema": Object {
+              "example": "Example cookie",
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "properties": Object {
+                  "requestParam": Object {
+                    "example": "Example request parameter",
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "requestParam",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "properties": Object {
+                    "responseParam": Object {
+                      "example": "Example response parameter",
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "responseParam",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "OK",
+          },
+          "400": Object {
+            "content": Object {
+              "text/plain": Object {
+                "schema": Object {
+                  "type": "string",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
+      },
+    },
     "/same-path-route": Object {
       "get": Object {
         "operationId": "samePathRoute1",
