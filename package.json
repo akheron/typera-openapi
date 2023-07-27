@@ -42,7 +42,7 @@
     "io-ts": "^2.2.13",
     "io-ts-types": "^0.5.12",
     "jest": "^27.0.1",
-    "prettier": "^2.2.1",
+    "prettier": "^3.0.0",
     "ts-jest": "^27.0.1",
     "typera-express": "^2.4.0"
   }
