@@ -335,7 +335,7 @@ const methodNames = [
   'patch',
 ] as const
 
-type Method = Exclude<typeof methodNames[number], 'all'>
+type Method = Exclude<(typeof methodNames)[number], 'all'>
 
 const isMethod = (value: string): value is Method =>
   methodNames.some((method) => value === method)
