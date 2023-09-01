@@ -746,6 +746,12 @@ Object {
                     "format": "date-time",
                     "type": "string",
                   },
+                  "falseLit": Object {
+                    "enum": Array [
+                      false,
+                    ],
+                    "type": "boolean",
+                  },
                   "nullableNum": Object {
                     "nullable": true,
                     "type": "number",
@@ -797,6 +803,12 @@ Object {
                     ],
                     "type": "string",
                   },
+                  "trueLit": Object {
+                    "enum": Array [
+                      true,
+                    ],
+                    "type": "boolean",
+                  },
                 },
                 "required": Array [
                   "str",
@@ -807,6 +819,8 @@ Object {
                   "numLits",
                   "strLit",
                   "strLits",
+                  "trueLit",
+                  "falseLit",
                   "date",
                 ],
                 "type": "object",

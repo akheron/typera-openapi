@@ -991,6 +991,10 @@ const typeToSchema = (
       if (isNumberType(type)) {
         return { type: 'number', ...base }
       }
+      if (isBooleanLiteralType(type)) {
+        const isTrue = type === ctx.checker.getTrueType()
+        return { type: 'boolean', enum: [isTrue], ...base }
+      }
       if (isBooleanType(type)) {
         return { type: 'boolean', ...base }
       }

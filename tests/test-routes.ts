@@ -70,6 +70,8 @@ const codec = t.intersection([
     numLits: t.union([t.literal(42), t.literal(123)]),
     strLit: t.literal('foo'),
     strLits: t.union([t.literal('foo'), t.literal('bar')]),
+    trueLit: t.literal(true),
+    falseLit: t.literal(false),
     date: DateFromISOString,
   }),
   t.partial({ optionalBool: t.boolean }),
